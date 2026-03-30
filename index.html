@@ -3,47 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>แจ้งแผน Glycerine — RG & CG v11</title>
-<style>
-/* System fonts only - no external requests needed */
-body{font-family:'Sarabun','TH Sarabun New','Noto Sans Thai',Tahoma,'Segoe UI',Arial,sans-serif}
-code,pre,kbd,samp,.wk-label,.hstat-v,.dnum,.cpill-ton,.pbadge,.sum-num,.sum-total,.wfv,.rs-val,.mstat-v,.mc-ton,.wday-num,.today-badge,.auto-calc-note,.calc-result,.mlbl{font-family:'IBM Plex Mono','Courier New',Consolas,monospace}
-</style>
-<script>
-// XLSX loaded on-demand when import/export is clicked
-window.__xlsxReady = false;
-window.__xlsxLoading = false;
-window.__xlsxCallbacks = [];
-window.loadXLSX = function(cb) {
-  if(window.__xlsxReady) { cb(); return; }
-  if(cb) window.__xlsxCallbacks.push(cb);
-  if(window.__xlsxLoading) return;
-  window.__xlsxLoading = true;
-  var cdns = [
-    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
-    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
-  ];
-  function tryLoad(i){
-    if(i>=cdns.length){ 
-      window.__xlsxLoading=false;
-      showToast && showToast('❌','โหลด XLSX ไม่ได้','ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต',0);
-      return; 
-    }
-    var s=document.createElement('script');
-    s.src=cdns[i];
-    s.onload=function(){ 
-      window.__xlsxReady=true; 
-      window.__xlsxLoading=false;
-      window.__xlsxCallbacks.forEach(function(f){try{f();}catch(e){}});
-      window.__xlsxCallbacks=[];
-    };
-    s.onerror=function(){tryLoad(i+1);};
-    document.head.appendChild(s);
-  }
-  tryLoad(0);
-};
-</script>
+<title>แจ้งแผน Glycerine — RG & CG</title>
+<style>body,button,input,select,textarea{font-family:'Sarabun','TH Sarabun New','Noto Sans Thai',Tahoma,'Segoe UI',Arial,sans-serif}</style>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#f5f7fa;--sur:#fff;--sur2:#f8fafc;--sur3:#f1f5f9;
@@ -250,7 +213,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);font-
 .ccell.today .ccell-num{color:#065f46}
 .ccell.wknd .ccell-num{color:#c2410c}
 /* calendar entries use individual colour per customer */
-.cent{border-radius:4px;padding:2px 5px;font-size:10px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:3px;border-left:2px solid var(--cc);background:rgba(200,200,200,0.15)}
+.cent{border-radius:4px;padding:2px 5px;font-size:10px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:3px;border-left:2px solid var(--cc);background:color-mix(in srgb, var(--cc) 10%, white)}
 .cent-name{font-weight:700;color:var(--cc);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:68%}
 .cent-ton{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--tx3);margin-left:auto}
 .cmore{font-size:9px;color:var(--tx4);text-align:center;padding:1px}
@@ -279,7 +242,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);font-
 .t-bar-fill{height:100%;background:#34d399;border-radius:2px;width:0%;transition:width .4s ease}
 
 /* ══ MODAL ══ */
-.ov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
 .ov.show{opacity:1;pointer-events:all}
 .modal{background:var(--sur);border-radius:var(--r);box-shadow:var(--s3);width:100%;max-width:560px;max-height:86vh;overflow:hidden;display:flex;flex-direction:column;transform:translateY(12px);transition:transform .2s}
 .ov.show .modal{transform:translateY(0)}
@@ -413,29 +376,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);font-
   .range-summary{grid-template-columns:repeat(3,1fr)}
   .toolbar{padding:8px 16px}
 }
-
-/* ══ AUTH / LOCK ══ */
-.auth-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
-.auth-btn:hover{background:rgba(255,255,255,.22)}
-.auth-btn.unlocked{background:rgba(52,211,153,.2);border-color:rgba(52,211,153,.5);color:#34d399}
-.auth-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px}
-.auth-box{background:var(--sur);border-radius:20px;box-shadow:0 24px 60px rgba(0,0,0,.3);width:100%;max-width:360px;overflow:hidden}
-.auth-hdr{padding:28px 24px 20px;background:linear-gradient(135deg,#064e3b,#047857);text-align:center}
-.auth-ico{font-size:40px;margin-bottom:10px}
-.auth-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px}
-.auth-sub{font-size:12px;color:rgba(255,255,255,.65)}
-.auth-body{padding:24px}
-.auth-inp-wrap{position:relative;margin-bottom:14px}
-.auth-inp{width:100%;padding:13px 44px 13px 14px;border:2px solid var(--bdr2);border-radius:12px;font-family:'Sarabun',sans-serif;font-size:16px;color:var(--tx);background:var(--sur);outline:none;transition:border-color .15s;letter-spacing:3px}
-.auth-inp:focus{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.12)}
-.auth-inp.shake{animation:shake .35s ease}
-.auth-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--tx3);font-size:18px;padding:4px;line-height:1}
-.auth-err{color:#ef4444;font-size:12px;text-align:center;margin-bottom:12px;min-height:16px;font-weight:600}
-.auth-submit{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#064e3b,#10b981);color:#fff;font-family:'Sarabun',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s}
-.auth-submit:hover{opacity:.9;box-shadow:0 6px 20px rgba(16,185,129,.3)}
-.auth-cancel{width:100%;padding:10px;border:none;background:none;color:var(--tx3);font-family:'Sarabun',sans-serif;font-size:13px;cursor:pointer;margin-top:8px;border-radius:8px;transition:background .15s}
-.auth-cancel:hover{background:var(--sur2)}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+</style>
 </head>
 <body>
 
@@ -457,15 +398,12 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);font-
     </div>
     <div class="hdr-btns">
       <div class="today-badge" id="today-badge">—</div>
-      <!-- ปุ่มเหล่านี้ซ่อน/แสดงตาม isEditor -->
-      <label id="btn-import" class="hbtn solid" title="นำเข้าจาก Excel" style="display:none">
+      <label class="hbtn solid" title="นำเข้าจาก Excel">
         📥 นำเข้า Excel
         <input type="file" id="xl-file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(this)">
       </label>
-      <button id="btn-export" class="hbtn ghost" onclick="exportExcel()" style="display:none">📤 Export Excel</button>
-      <button id="btn-add" class="hbtn ghost" onclick="openAdd()" style="display:none">＋ เพิ่มแจ้งแผน</button>
-      <!-- ปุ่ม lock/unlock -->
-      <button id="auth-toggle-btn" class="auth-btn" onclick="showAuthModal()">🔒 เข้าสู่ระบบ</button>
+      <button class="hbtn ghost" onclick="exportExcel()">📤 Export Excel</button>
+      <button class="hbtn ghost" onclick="openAdd()">＋ เพิ่มแจ้งแผน</button>
       <div id="sync-badge" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11px;color:rgba(255,255,255,.7);white-space:nowrap">
         <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:#fbbf24;flex-shrink:0;display:inline-block"></span>
         <span id="sync-txt">กำลังเชื่อมต่อ...</span>
@@ -752,7 +690,7 @@ function renderDaily(){
           </div>
           <div class="day-custs">
             ${hasP?pills:'<span class="no-plan-txt">— ไม่มีแผนวันนี้ —</span>'}
-            ${hasP?`<button class="edit-btn" onclick="openEdit('${d}')" style="${isEditor?'':'display:none'}">✏️</button>`:''}
+            ${hasP?`<button class="edit-btn" onclick="openEdit('${d}')">✏️</button>`:''}
           </div>
         </div>
         ${sumStripHtml(d)}`;
@@ -924,7 +862,7 @@ function renderMonthly(){
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
           <span style="width:10px;height:10px;border-radius:50%;background:var(--acc);flex-shrink:0;display:inline-block"></span>
           <span style="font-size:13px;font-weight:700;color:var(--tx);font-family:'IBM Plex Mono',monospace">${MTH[+m-1]} ${yr}</span>
-          ${hasData?`<button onclick="toggleMonthTable('${moId}')" data-mo="${mo}" data-dates='${JSON.stringify(moDates).replace(/'/g,"&#39;")}' style="margin-left:auto;padding:2px 8px;font-size:10px;border-radius:5px;border:1.5px solid var(--bdr2);background:var(--sur2);color:var(--tx3);cursor:pointer;font-family:'Sarabun',sans-serif">📋 ดูรายวัน</button>`:''}
+          ${hasData?`<button onclick="toggleMonthTable('${moId}')" style="margin-left:auto;padding:2px 8px;font-size:10px;border-radius:5px;border:1.5px solid var(--bdr2);background:var(--sur2);color:var(--tx3);cursor:pointer;font-family:'Sarabun',sans-serif">📋 ดูรายวัน</button>`:''}
         </div>
         ${hasData?`
         <!-- stats row -->
@@ -951,8 +889,10 @@ function renderMonthly(){
       <div style="padding:10px 14px;flex:1">
         ${custRows}${moreC}
       </div>`:''}
-      <!-- collapsible day table (lazy — built on click) -->
-      <div id="${moId}" style="display:none;border-top:1px solid var(--bdr)"></div>`;
+      <!-- collapsible day table (hidden by default) -->
+      <div id="${moId}" style="display:none;border-top:1px solid var(--bdr)">
+        ${buildMonthDayTable(mo,moDates)}
+      </div>`;
     grid.appendChild(card);
   });
 
@@ -962,19 +902,7 @@ function renderMonthly(){
 function toggleMonthTable(id){
   const el=document.getElementById(id);
   if(!el)return;
-  if(el.style.display==='none'){
-    if(!el.dataset.built){
-      // Get mo and moDates from button's data attributes
-      const btn=document.querySelector(`[onclick="toggleMonthTable('${id}')"]`);
-      const mo=btn?btn.dataset.mo:'';
-      const moDates=btn?JSON.parse(btn.dataset.dates||'[]'):[];
-      el.innerHTML=buildMonthDayTable(mo,moDates);
-      el.dataset.built='1';
-    }
-    el.style.display='block';
-  } else {
-    el.style.display='none';
-  }
+  el.style.display=el.style.display==='none'?'block':'none';
 }
 
 function buildMonthDayTable(mo,moDates){
@@ -1141,7 +1069,7 @@ function renderRange(){
     card.className=`day-card ${wknd?'is-wknd':''} ${isToday?'is-today':''}`.trim();
     card.style.animationDelay=`${idx*8}ms`;
     const pills=Object.entries(custs).map(([c,u])=>`<div class="cpill"><span class="cpill-dot"></span><span class="cpill-name">${c}</span><span class="cpill-ton">${fT(u.Ton)}</span><div class="cpill-pkgs">${pkgBadgeHtml(u)}${remTagHtml(u)}</div></div>`).join('');
-    card.innerHTML=`<div class="day-hdr"><div class="day-date-col"><div class="dnum">${String(dt.getDate()).padStart(2,'0')}</div><div class="dwd">${WD[dow]}</div>${isToday?'<span class="pip today">TODAY</span>':''}${wknd?'<span class="pip wknd">WKND</span>':''}</div><div class="day-custs">${pills}${isEditor?`<button class="edit-btn" onclick="openEdit('${d}')">✏️</button>`:''}</div></div>${sumStripHtml(d)}`;
+    card.innerHTML=`<div class="day-hdr"><div class="day-date-col"><div class="dnum">${String(dt.getDate()).padStart(2,'0')}</div><div class="dwd">${WD[dow]}</div>${isToday?'<span class="pip today">TODAY</span>':''}${wknd?'<span class="pip wknd">WKND</span>':''}</div><div class="day-custs">${pills}<button class="edit-btn" onclick="openEdit('${d}')">✏️</button></div></div>${sumStripHtml(d)}`;
     dayList.appendChild(card);
   });
   rangeEl.appendChild(dayList);
@@ -1258,7 +1186,6 @@ function addEntry(){
   list.appendChild(div.firstElementChild);
 }
 function saveModal(){
-  if(!requireEditor())return;
   const date=mDate||document.getElementById('mi-date')?.value;if(!date)return;
   const result={};
   document.querySelectorAll('.centry').forEach(entry=>{
@@ -1300,13 +1227,6 @@ function hideToast(d=2800){setTimeout(()=>document.getElementById('toast').class
 // Sheet names: 'แผนขาย RG', 'แผนขาย CG', 'ลูกค้า'
 // Also supports old single-sheet format (any sheet with 'แผนขาย')
 function importExcel(input){
-  if(!requireEditor()){input.value='';return;}
-  if(!window.__xlsxReady||typeof XLSX==='undefined'){
-    showToast('⚠️','กำลังโหลด XLSX...','รอสักครู่',50);
-    var savedInput=input;
-    window.loadXLSX(function(){ importExcel(savedInput); });
-    return;
-  }
   const file=input.files[0];if(!file)return;
   showToast('📂','กำลังอ่านไฟล์...',file.name,15);
   const reader=new FileReader();
@@ -1382,12 +1302,6 @@ function importExcel(input){
 
 // ══ EXPORT EXCEL ══ — writes both RG + CG in one shared workbook
 function exportExcel(){
-  if(!requireEditor())return;
-  if(!window.__xlsxReady||typeof XLSX==='undefined'){
-    showToast('⚠️','กำลังโหลด XLSX...','รอสักครู่',50);
-    window.loadXLSX(function(){ exportExcel(); });
-    return;
-  }
   showToast('📤','กำลัง Export...','สร้างไฟล์ Excel (RG + CG)',30);
   try{
     const wb=XLSX.utils.book_new();
@@ -1441,90 +1355,6 @@ function exportExcel(){
     XLSX.writeFile(wb,fname);
     showToast('✅','Export สำเร็จ! (RG + CG)',fname,100);hideToast(3000);
   }catch(err){showToast('❌','Export ล้มเหลว',err.message,0);hideToast(4000)}
-}
-
-// ══════════════════════════════════════════════════
-// AUTH SYSTEM — Password protection for editors
-// ══════════════════════════════════════════════════
-// เปลี่ยน password ตรงนี้ได้เลย ↓
-const EDITOR_PASSWORD = 'glycerine2026';
-
-let isEditor = false; // false = viewer only, true = can edit
-
-function setEditorMode(on){
-  isEditor = on;
-  // แสดง/ซ่อนปุ่ม editor
-  ['btn-import','btn-export','btn-add'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.style.display = on ? 'flex' : 'none';
-  });
-  // ซ่อนปุ่ม edit ใน day cards เมื่อเป็น viewer
-  document.querySelectorAll('.edit-btn').forEach(b=>b.style.display=on?'':'none');
-  // อัปเดตปุ่ม auth
-  const btn=document.getElementById('auth-toggle-btn');
-  if(btn){
-    if(on){
-      btn.innerHTML='🔓 ออกจากระบบ';
-      btn.classList.add('unlocked');
-      btn.onclick=logoutEditor;
-    } else {
-      btn.innerHTML='🔒 เข้าสู่ระบบ';
-      btn.classList.remove('unlocked');
-      btn.onclick=showAuthModal;
-    }
-  }
-}
-
-function showAuthModal(){
-  document.getElementById('auth-overlay').style.display='flex';
-  document.getElementById('auth-inp').value='';
-  document.getElementById('auth-err').textContent='';
-  setTimeout(()=>document.getElementById('auth-inp').focus(),100);
-}
-
-function closeAuthModal(){
-  document.getElementById('auth-overlay').style.display='none';
-}
-
-function authOverlayClick(e){
-  if(e.target===document.getElementById('auth-overlay')) closeAuthModal();
-}
-
-function toggleAuthEye(){
-  const inp=document.getElementById('auth-inp');
-  const btn=document.getElementById('auth-eye-btn');
-  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
-  else{inp.type='password';btn.textContent='👁';}
-}
-
-function submitAuth(){
-  const val=document.getElementById('auth-inp').value;
-  const errEl=document.getElementById('auth-err');
-  const inp=document.getElementById('auth-inp');
-  if(val===EDITOR_PASSWORD){
-    closeAuthModal();
-    setEditorMode(true);
-    showToast('🔓','เข้าสู่โหมดแก้ไขแล้ว','สามารถเพิ่ม/แก้ไข/Export ข้อมูลได้',100);
-    hideToast(2500);
-  } else {
-    errEl.textContent='❌ Password ไม่ถูกต้อง กรุณาลองใหม่';
-    inp.classList.add('shake');
-    inp.value='';
-    inp.focus();
-    setTimeout(()=>inp.classList.remove('shake'),400);
-  }
-}
-
-function logoutEditor(){
-  setEditorMode(false);
-  showToast('🔒','ออกจากโหมดแก้ไขแล้ว','กลับสู่โหมดดูข้อมูล',100);
-  hideToast(2000);
-}
-
-// Guard functions — เรียกก่อน save/import/export
-function requireEditor(){
-  if(!isEditor){showAuthModal();return false;}
-  return true;
 }
 
 // ══════════════════════════════════════════════════
@@ -1582,18 +1412,12 @@ function initFirebase(){
 }
 
 function renderFallback(){
-  try{
-    const d=new Date(),dy=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-    document.getElementById('today-badge').textContent=`${dy[d.getDay()]} ${d.getDate()} ${MTH[d.getMonth()]} ${d.getFullYear()}`;
-    document.getElementById('range-start').value=TODAY.slice(0,7)+'-01';
-    document.getElementById('range-end').value=TODAY;
-    Object.values(DATA).forEach(d=>Object.keys(d).forEach(c=>ccCal(c)));
-    try{updateStats();}catch(e){console.error('updateStats:',e);}
-    try{renderDaily();}catch(e){console.error('renderDaily:',e);}
-    try{renderWeekly();}catch(e){console.error('renderWeekly:',e);}
-    try{renderMonthly();}catch(e){console.error('renderMonthly:',e);}
-    try{renderCalendar();}catch(e){console.error('renderCalendar:',e);}
-  }catch(e){console.error('renderFallback error:',e);}
+  const d=new Date(),dy=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+  document.getElementById('today-badge').textContent=`${dy[d.getDay()]} ${d.getDate()} ${MTH[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById('range-start').value=TODAY.slice(0,7)+'-01';
+  document.getElementById('range-end').value=TODAY;
+  Object.values(DATA).forEach(d=>Object.keys(d).forEach(c=>ccCal(c)));
+  updateStats();renderDaily();renderWeekly();renderMonthly();renderCalendar();
 }
 
 
@@ -1703,76 +1527,38 @@ function fbSaveCustomers(){
 // (handled inside initFirebase)
 
 // ══ INIT ══
-// Wait for full DOM before running
 document.addEventListener('DOMContentLoaded', function(){
-  try {
-    var srchInp = document.getElementById('srch-inp');
-    if(srchInp) srchInp.addEventListener('input',function(e){srch=e.target.value;renderTab(activeTab)});
-    setSyncStatus('connecting');
-    try { renderFallback(); } catch(e) { console.error('renderFallback error:', e); }
-    window.__appReady = function(){};
-  } catch(e) {
-    console.error('INIT error:', e);
-  }
+  var inp=document.getElementById('srch-inp');
+  if(inp) inp.addEventListener('input',function(e){srch=e.target.value;renderTab(activeTab);});
+  setSyncStatus('connecting');
+  try{
+    var d=new Date(),dy=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+    var tb=document.getElementById('today-badge');
+    if(tb) tb.textContent=dy[d.getDay()]+' '+d.getDate()+' '+MTH[d.getMonth()]+' '+d.getFullYear();
+    var rs=document.getElementById('range-start'),re2=document.getElementById('range-end');
+    if(rs) rs.value=TODAY.slice(0,7)+'-01';
+    if(re2) re2.value=TODAY;
+    Object.values(DATA).forEach(function(d){Object.keys(d).forEach(function(c){ccCal(c);});});
+    updateStats();renderDaily();renderWeekly();renderMonthly();renderCalendar();
+  }catch(e){console.error('Init render:',e);}
 });
 </script>
-<!-- AUTH MODAL -->
-<div class="auth-overlay" id="auth-overlay" style="display:none" onclick="authOverlayClick(event)">
-  <div class="auth-box">
-    <div class="auth-hdr">
-      <div class="auth-ico">🔐</div>
-      <div class="auth-title">เข้าสู่โหมดแก้ไข</div>
-      <div class="auth-sub">กรอก Password เพื่อเพิ่ม/แก้ไข/Export ข้อมูล</div>
-    </div>
-    <div class="auth-body">
-      <div class="auth-err" id="auth-err"></div>
-      <div class="auth-inp-wrap">
-        <input type="password" class="auth-inp" id="auth-inp" placeholder="••••••••"
-          onkeydown="if(event.key==='Enter')submitAuth()"
-          oninput="document.getElementById('auth-err').textContent=''">
-        <button class="auth-eye" onclick="toggleAuthEye()" id="auth-eye-btn">👁</button>
-      </div>
-      <button class="auth-submit" onclick="submitAuth()">🔓 เข้าสู่ระบบ</button>
-      <button class="auth-cancel" onclick="closeAuthModal()">ยกเลิก</button>
-    </div>
-  </div>
-</div>
-
-<!-- Firebase SDKs — skip if running from file:// (Edge security) -->
+<!-- Firebase SDKs — skip on file:// -->
 <script>
-(function(){
-  // Don't load Firebase from file:// — Edge blocks it
-  if(location.protocol === 'file:') {
-    console.log('Running from file:// — Firebase disabled, offline mode');
-    setSyncStatus('offline');
-    return;
-  }
-  var fbCDNs=[
-    'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
-    'https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.min.js'
-  ];
-  var dbCDNs=[
-    'https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js',
-    'https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database-compat.min.js'
-  ];
-  function loadScript(urls,idx,onOk,onFail){
-    if(idx>=urls.length){if(onFail)onFail();return;}
-    var s=document.createElement('script');
-    s.src=urls[idx];
-    s.onload=function(){if(onOk)onOk();};
-    s.onerror=function(){loadScript(urls,idx+1,onOk,onFail);};
-    document.body.appendChild(s);
-  }
-  loadScript(fbCDNs,0,
-    function(){
-      loadScript(dbCDNs,0,
-        function(){ initFirebase(); },
-        function(){ console.log('Firebase DB unavailable'); setSyncStatus('offline'); }
-      );
-    },
-    function(){ console.log('Firebase App unavailable'); setSyncStatus('offline'); }
-  );
-})();
+if(location.protocol !== 'file:'){
+  var _fa=document.createElement('script');
+  _fa.src='https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js';
+  _fa.onload=function(){
+    var _fd=document.createElement('script');
+    _fd.src='https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js';
+    _fd.onload=function(){initFirebase();};
+    _fd.onerror=function(){setSyncStatus('offline');};
+    document.body.appendChild(_fd);
+  };
+  _fa.onerror=function(){setSyncStatus('offline');};
+  document.body.appendChild(_fa);
+} else {
+  setSyncStatus('offline');
+}
 </script>
 </body>
-</html>
