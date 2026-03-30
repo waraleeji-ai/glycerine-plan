@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>แจ้งแผน Glycerine — RG & CG v11</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+// Load XLSX in background — app works without it, only needed for import/export
+window.__xlsxReady = false;
+(function(){
+  var cdns = [
+    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+  ];
+  function tryLoad(i){
+    if(i>=cdns.length){ return; } // Failed silently — import/export buttons will show error
+    var s=document.createElement('script');
+    s.src=cdns[i];
+    s.crossOrigin='anonymous';
+    s.onload=function(){ window.__xlsxReady=true; };
+    s.onerror=function(){tryLoad(i+1);};
+    document.head.appendChild(s);
+  }
+  tryLoad(0);
+})();
+</script>
+<style>
+:root{
+  --bg:#f5f7fa;--sur:#fff;--sur2:#f8fafc;--sur3:#f1f5f9;
+  --bdr:#e2e8f0;--bdr2:#cbd5e0;
+  --tx:#111827;--tx2:#374151;--tx3:#6b7280;--tx4:#9ca3af;
+  --wknd-bg:#fff8f0;--wknd-bdr:#fed7aa;
+  --acc:#10b981;--acc-l:#ecfdf5;
+  --today-glow:0 0 0 3px rgba(16,185,129,.25);
+  --s1:0 1px 4px rgba(0,0,0,.07);--s2:0 4px 16px rgba(0,0,0,.09);--s3:0 12px 36px rgba(0,0,0,.13);
+  --r:14px;--r2:8px;
+  /* Package colours */
+  --flex-c:#dc2626;--flex-l:#fef2f2;--flex-m:#fca5a5;
+  --drum-c:#b45309;--drum-l:#fef3c7;--drum-m:#fde68a;
+  --ibc-c:#0d9488; --ibc-l:#f0fdfa; --ibc-m:#99f6e4;
+  --tank-c:#7c3aed;--tank-l:#f5f3ff;--tank-m:#ddd6fe;
+  /* all customers same colour in list/week/month */
+  --cust-c:#047857;--cust-bg:#ecfdf5;--cust-bd:#6ee7b7;
+}
+/* Calendar customer colours (18) */
+.cc0{--cc:#ef4444}.cc1{--cc:#f97316}.cc2{--cc:#eab308}.cc3{--cc:#22c55e}
+.cc4{--cc:#14b8a6}.cc5{--cc:#3b82f6}.cc6{--cc:#8b5cf6}.cc7{--cc:#ec4899}
+.cc8{--cc:#06b6d4}.cc9{--cc:#84cc16}.cc10{--cc:#f59e0b}.cc11{--cc:#10b981}
+.cc12{--cc:#6366f1}.cc13{--cc:#e11d48}.cc14{--cc:#0ea5e9}.cc15{--cc:#a855f7}
+.cc16{--cc:#64748b}.cc17{--cc:#78716c}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;min-height:100vh}
+
+/* ══ PRODUCT SWITCHER ══ */
+.prod-bar{display:flex;gap:0;background:#052e16;border-bottom:2px solid #064e3b;flex-shrink:0;position:sticky;top:0;z-index:400}
+.prod-tab{flex:1;padding:9px 0;text-align:center;cursor:pointer;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,.5);border:none;background:none;transition:all .18s;position:relative;-webkit-tap-highlight-color:transparent}
+.prod-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;transform:scaleX(0);transition:transform .18s;border-radius:2px 2px 0 0}
+.prod-tab.rg::after{background:#34d399}
+.prod-tab.cg::after{background:#fb923c}
+.prod-tab.active{color:#fff}
+.prod-tab.rg.active{background:rgba(52,211,153,.08)}
+.prod-tab.cg.active{background:rgba(251,146,60,.08)}
+.prod-tab.active::after{transform:scaleX(1)}
+.prod-pip{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.prod-tab.rg .prod-pip{background:#34d399}
+.prod-tab.cg .prod-pip{background:#fb923c}
+.hdr{background:linear-gradient(135deg,#064e3b 0%,#047857 100%);padding:18px 24px 0;position:sticky;top:36px;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.hdr-top{display:flex;align-items:center;gap:12px;padding-bottom:12px;flex-wrap:wrap}
+.hdr-logo{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid rgba(255,255,255,.2);flex-shrink:0}
+.hdr-title h1{font-size:17px;font-weight:700;color:#fff;letter-spacing:-.3px}
+.hdr-title p{font-size:10px;color:rgba(255,255,255,.55);font-family:'IBM Plex Mono',monospace;margin-top:1px}
+.hdr-stats{display:flex;gap:18px;margin-left:auto}
+.hstat-v{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:700;color:#fff;line-height:1}
+.hstat-l{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;letter-spacing:.3px}
+.hdr-btns{display:flex;gap:7px;align-items:center}
+.today-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(255,255,255,.15);color:#fff;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.2);white-space:nowrap}
+.hbtn{display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:20px;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.25);transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.hbtn.ghost{background:rgba(255,255,255,.15);color:#fff}.hbtn.ghost:hover{background:rgba(255,255,255,.25)}
+.hbtn.solid{background:rgba(255,255,255,.9);color:#064e3b}.hbtn.solid:hover{background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+
+.nav-tabs{display:flex;gap:1px;padding:0 2px}
+.ntab{padding:9px 18px;color:rgba(255,255,255,.6);border:none;background:none;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:9px 9px 0 0;transition:all .15s;white-space:nowrap;border-bottom:3px solid transparent}
+.ntab:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.08)}
+.ntab.on{color:#fff;background:rgba(255,255,255,.14);border-bottom-color:#34d399}
+
+/* ══ TOOLBAR ══ */
+.toolbar{background:var(--sur);border-bottom:1px solid var(--bdr);padding:9px 24px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;position:sticky;top:141px;z-index:200;box-shadow:var(--s1)}
+.srch{display:flex;align-items:center;gap:5px;background:var(--sur2);border:1.5px solid var(--bdr);border-radius:20px;padding:5px 12px;min-width:170px;transition:all .15s}
+.srch:focus-within{border-color:#10b981}
+.srch input{background:none;border:none;outline:none;font-family:'Sarabun',sans-serif;font-size:12px;color:var(--tx);width:100%}
+.srch input::placeholder{color:var(--tx4)}
+.fbtn{padding:5px 12px;border-radius:20px;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr2);background:var(--sur);color:var(--tx3);transition:all .15s;white-space:nowrap}
+.fbtn:hover{background:var(--sur3)}
+.fbtn.on{background:#ecfdf5;border-color:#6ee7b7;color:#065f46;font-weight:600}
+.fgrp{display:flex}.fgrp .fbtn{border-radius:0;border-right-width:0}
+.fgrp .fbtn:first-child{border-radius:20px 0 0 20px}
+.fgrp .fbtn:last-child{border-radius:0 20px 20px 0;border-right-width:1.5px}
+.wk-nav{display:flex;align-items:center;gap:7px}
+.wk-arrow{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--bdr2);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--tx3);transition:all .15s}
+.wk-arrow:hover{background:var(--sur3)}
+.wk-label{font-size:12px;font-weight:600;color:var(--tx2);font-family:'IBM Plex Mono',monospace;white-space:nowrap}
+.tsep{width:1px;height:20px;background:var(--bdr);flex-shrink:0}
+
+/* ══ LEGEND ══ */
+.pkg-legend{display:flex;gap:10px;flex-wrap:wrap;padding:8px 16px;background:var(--sur);border-radius:0;border-bottom:1px solid var(--bdr);box-shadow:var(--s1);position:sticky;top:185px;z-index:150}
+.pk-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--tx2)}
+
+/* ══ CONTENT ══ */
+.content{padding:18px 24px;max-width:1400px;margin:0 auto}
+.tab-panel{display:none}.tab-panel.on{display:block}
+
+/* month section */
+.msec{margin-bottom:28px}
+.mhdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:9px 14px;background:linear-gradient(135deg,#064e3b,#047857);border-radius:var(--r2);position:sticky;top:218px;z-index:100}
+.mlbl{font-size:12px;font-weight:700;color:#fff;font-family:'IBM Plex Mono',monospace;letter-spacing:.5px}
+.mline{flex:1;height:1px;background:rgba(255,255,255,.2)}
+.mstag{font-size:10px;font-family:'IBM Plex Mono',monospace;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;gap:3px}
+
+/* ══ DAILY CARDS ══ */
+.day-list{display:flex;flex-direction:column;gap:8px}
+.day-card{background:var(--sur);border:1.5px solid var(--bdr);border-radius:var(--r);box-shadow:var(--s1);overflow:hidden;transition:box-shadow .15s}
+.day-card:hover{box-shadow:var(--s2)}
+.day-card.is-wknd{background:var(--wknd-bg);border-color:var(--wknd-bdr)}
+.day-card.is-today{box-shadow:var(--today-glow),var(--s2);border-color:#10b981}
+.day-card.no-plan{opacity:.5}
+.day-hdr{display:flex;align-items:stretch;min-height:54px}
+.day-date-col{width:62px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--sur3);border-right:1.5px solid var(--bdr);padding:7px 4px;gap:2px}
+.day-card.is-wknd .day-date-col{background:#fed7aa}
+.day-card.is-today .day-date-col{background:linear-gradient(135deg,#064e3b,#047857);border-right-color:rgba(255,255,255,.15)}
+.dnum{font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:700;color:var(--tx);line-height:1}
+.day-card.is-today .dnum{color:#fff}
+.dwd{font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:.3px}
+.day-card.is-wknd .dwd{color:#c2410c}
+.day-card.is-today .dwd{color:rgba(255,255,255,.7)}
+.pip{font-size:8px;font-family:'IBM Plex Mono',monospace;font-weight:700;padding:1px 4px;border-radius:3px}
+.pip.today{background:#34d399;color:#064e3b}
+.pip.wknd{background:#ea580c;color:#fff}
+.day-custs{flex:1;display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:9px 13px}
+.no-plan-txt{font-size:12px;color:var(--tx4);font-style:italic}
+.edit-btn{padding:2px 8px;border-radius:5px;border:1px solid var(--bdr2);background:var(--sur2);color:var(--tx3);font-size:11px;cursor:pointer;flex-shrink:0;margin-left:auto;transition:all .15s}
+.edit-btn:hover{background:var(--sur3)}
+
+/* customer pill — uniform green for list/week/month */
+.cpill{display:flex;align-items:center;gap:7px;background:var(--cust-bg);border:1.5px solid var(--cust-bd);border-radius:9px;padding:6px 11px;flex-shrink:0;transition:box-shadow .15s}
+.cpill:hover{box-shadow:0 2px 8px rgba(4,120,87,.2)}
+.cpill-dot{width:8px;height:8px;border-radius:50%;background:var(--cust-c);flex-shrink:0}
+.cpill-name{font-size:12px;font-weight:700;color:var(--cust-c)}
+.cpill-ton{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--tx2)}
+.cpill-pkgs{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+
+/* package badge */
+.pbadge{display:inline-flex;align-items:center;gap:3px;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;white-space:nowrap}
+.pbadge.flex{background:var(--flex-l);color:var(--flex-c);border:1px solid var(--flex-m)}
+.pbadge.drum{background:var(--drum-l);color:var(--drum-c);border:1px solid var(--drum-m)}
+.pbadge.ibc{background:var(--ibc-l);color:var(--ibc-c);border:1px solid var(--ibc-m)}
+.pbadge.tank{background:var(--tank-l);color:var(--tank-c);border:1px solid var(--tank-m)}
+.pkg-ico{font-size:13px;line-height:1}
+
+/* remark */
+.rem-tag{display:inline-flex;align-items:center;gap:3px;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600}
+.rem-tag.wrap{background:#fef3c7;border:1px solid #fde68a;color:#92400e}
+.rem-tag.store{background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6}
+
+/* day summary */
+.day-sum{border-top:1px solid var(--bdr);background:var(--sur2);padding:5px 13px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.day-card.is-wknd .day-sum{background:#fff3e8;border-top-color:var(--wknd-bdr)}
+.sum-item{display:flex;align-items:center;gap:3px;font-size:11px}
+.sum-ico{font-size:13px}
+.sum-num{font-family:'IBM Plex Mono',monospace;font-weight:700}
+.sum-lbl{color:var(--tx3);font-size:10px}
+.sum-total{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:12px;color:var(--acc);margin-left:auto}
+
+/* ══ WEEKLY ══ */
+.week-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:18px}
+.wcol{background:var(--sur);border-radius:var(--r);border:1.5px solid var(--bdr);overflow:hidden;box-shadow:var(--s1)}
+.wcol.is-wknd{background:var(--wknd-bg);border-color:var(--wknd-bdr)}
+.wcol.is-today{border-color:#10b981;box-shadow:var(--today-glow)}
+.wcol-hdr{padding:9px 9px 7px;border-bottom:1.5px solid var(--bdr);background:var(--sur3)}
+.wcol.is-wknd .wcol-hdr{background:#fed7aa;border-bottom-color:var(--wknd-bdr)}
+.wcol.is-today .wcol-hdr{background:linear-gradient(135deg,#064e3b,#047857)}
+.wday-n{font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:.3px}
+.wcol.is-wknd .wday-n{color:#c2410c}
+.wcol.is-today .wday-n{color:rgba(255,255,255,.7)}
+.wday-num{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--tx)}
+.wcol.is-today .wday-num{color:#fff}
+.wcol-body{padding:7px;display:flex;flex-direction:column;gap:5px;min-height:70px}
+/* week customer entry — same green */
+.w-cust{border-radius:7px;padding:5px 7px;background:var(--cust-bg);border-left:3px solid var(--cust-c)}
+.w-cust-nm{font-size:11px;font-weight:700;color:var(--cust-c)}
+.w-cust-ton{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--tx2)}
+.w-cust-pkgs{display:flex;gap:3px;flex-wrap:wrap;margin-top:2px}
+.wcol-foot{padding:6px 9px;border-top:1px solid var(--bdr);background:var(--sur3);display:flex;flex-direction:column;gap:2px}
+.wcol.is-wknd .wcol-foot{background:#fff3e8;border-top-color:var(--wknd-bdr)}
+.wfr{display:flex;justify-content:space-between;font-size:10px}
+.wfl{color:var(--tx3)}.wfv{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--tx2)}
+.week-totals{background:var(--sur);border:1.5px solid var(--bdr);border-radius:var(--r2);padding:11px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:var(--s1)}
+.wt-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+
+/* ══ MONTHLY ══ */
+.monthly-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:22px}
+.mcard{background:var(--sur);border:1.5px solid var(--bdr);border-radius:var(--r);padding:16px;box-shadow:var(--s1)}
+.mcard-title{font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:12px;font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:7px}
+.mcard-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px}
+.mstat{background:var(--sur2);border-radius:var(--r2);padding:9px;text-align:center}
+.mstat-v{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:700;line-height:1}
+.mstat-l{font-size:10px;color:var(--tx3);margin-top:3px}
+.mcard-pkgs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.mpkg{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.mcard-custs{display:flex;flex-direction:column;gap:5px;padding-top:10px;border-top:1px solid var(--bdr)}
+.mc-row{display:flex;align-items:center;gap:7px;font-size:12px}
+.mc-name{font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--cust-c)}
+.mc-bar-wrap{width:70px;height:5px;background:var(--bdr);border-radius:3px;overflow:hidden}
+.mc-bar{height:100%;border-radius:3px;background:var(--cust-c)}
+.mc-ton{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tx3);min-width:38px;text-align:right}
+
+/* ══ CALENDAR ══ */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-dname{text-align:center;font-size:10px;font-weight:700;color:var(--tx3);padding:4px;font-family:'IBM Plex Mono',monospace;letter-spacing:.3px}
+.cal-dname.wk{color:#c2410c}
+.ccell{background:var(--sur);border:1.5px solid var(--bdr);border-radius:var(--r2);min-height:88px;padding:6px;cursor:default;transition:box-shadow .15s;overflow:hidden}
+.ccell:hover{box-shadow:var(--s2)}
+.ccell.wknd{background:var(--wknd-bg);border-color:var(--wknd-bdr)}
+.ccell.today{border-color:#10b981;box-shadow:var(--today-glow)}
+.ccell.empty{background:var(--sur2);opacity:.4;cursor:default}
+.ccell.has-plan{border-top:3px solid var(--acc)}
+.ccell.wknd.has-plan{border-top-color:#ea580c}
+.ccell-num{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:4px}
+.ccell.today .ccell-num{color:#065f46}
+.ccell.wknd .ccell-num{color:#c2410c}
+/* calendar entries use individual colour per customer */
+.cent{border-radius:4px;padding:2px 5px;font-size:10px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:3px;border-left:2px solid var(--cc);background:color-mix(in srgb, var(--cc) 10%, white)}
+.cent-name{font-weight:700;color:var(--cc);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:68%}
+.cent-ton{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--tx3);margin-left:auto}
+.cmore{font-size:9px;color:var(--tx4);text-align:center;padding:1px}
+
+/* ══ DATE RANGE TAB ══ */
+.range-controls{background:var(--sur);border-radius:var(--r);border:1.5px solid var(--bdr);padding:18px;box-shadow:var(--s1);margin-bottom:20px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.range-field{display:flex;flex-direction:column;gap:5px}
+.range-label{font-size:12px;font-weight:600;color:var(--tx2)}
+.range-input{padding:8px 12px;border:1.5px solid var(--bdr2);border-radius:var(--r2);font-family:'Sarabun',sans-serif;font-size:13px;color:var(--tx);outline:none;transition:border-color .15s}
+.range-input:focus{border-color:#10b981}
+.range-btn{padding:8px 20px;border:none;border-radius:var(--r2);background:#10b981;color:#fff;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.range-btn:hover{background:#059669}
+.range-summary{background:linear-gradient(135deg,#064e3b,#047857);border-radius:var(--r);padding:16px 20px;margin-bottom:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+.rs-card{background:rgba(255,255,255,.12);border-radius:var(--r2);padding:12px 14px;text-align:center;border:1px solid rgba(255,255,255,.15)}
+.rs-ico{font-size:22px;margin-bottom:5px}
+.rs-val{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:#fff;line-height:1}
+.rs-sub{font-size:11px;color:rgba(255,255,255,.65);margin-top:3px}
+.range-days{margin-top:4px}
+.range-empty{text-align:center;padding:50px;color:var(--tx4);font-size:14px}
+
+/* ══ TOAST ══ */
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;background:#064e3b;color:#fff;border-radius:12px;padding:13px 18px;box-shadow:var(--s3);display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;transform:translateY(72px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;max-width:340px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-sub{font-size:11px;font-weight:400;color:rgba(255,255,255,.65);margin-top:2px}
+.t-bar{height:3px;background:rgba(255,255,255,.3);border-radius:2px;margin-top:7px;overflow:hidden}
+.t-bar-fill{height:100%;background:#34d399;border-radius:2px;width:0%;transition:width .4s ease}
+
+/* ══ MODAL ══ */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.ov.show{opacity:1;pointer-events:all}
+.modal{background:var(--sur);border-radius:var(--r);box-shadow:var(--s3);width:100%;max-width:560px;max-height:86vh;overflow:hidden;display:flex;flex-direction:column;transform:translateY(12px);transition:transform .2s}
+.ov.show .modal{transform:translateY(0)}
+.modal-hdr{padding:15px 20px 12px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:linear-gradient(135deg,#064e3b,#047857)}
+.modal-title{font-size:15px;font-weight:700;color:#fff}
+.modal-close{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:rgba(255,255,255,.25)}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+.modal-foot{padding:11px 20px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.flbl{font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;display:block}
+.finp,.fsel{width:100%;padding:8px 10px;border:1.5px solid var(--bdr2);border-radius:var(--r2);font-family:'Sarabun',sans-serif;font-size:13px;color:var(--tx);background:var(--sur);outline:none;transition:all .15s}
+.finp:focus,.fsel:focus{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.1)}
+.frow{margin-bottom:11px}
+.frow-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:11px}
+.frow-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:11px}
+.centry{background:var(--sur2);border:1.5px solid var(--bdr);border-radius:var(--r2);padding:12px;margin-bottom:8px}
+.cehdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.cename{font-size:13px;font-weight:600;color:var(--tx)}
+.delbtn{background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:5px;padding:2px 8px;font-size:11px;cursor:pointer}
+.auto-calc-note{font-size:10px;color:var(--acc);font-style:italic;margin-top:3px}
+.calc-result{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--acc);padding:6px 10px;background:var(--acc-l);border-radius:5px;margin-top:6px}
+.addcbtn{width:100%;padding:7px;border:1.5px dashed var(--bdr2);border-radius:var(--r2);background:none;font-family:'Sarabun',sans-serif;font-size:12px;color:var(--tx3);cursor:pointer;transition:all .15s}
+.addcbtn:hover{background:var(--sur3)}
+.sbtn{padding:8px 18px;border:none;border-radius:var(--r2);font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;cursor:pointer;color:#fff;background:#10b981}
+.sbtn:hover{background:#059669}
+.cancelbtn{padding:8px 14px;border:1.5px solid var(--bdr2);border-radius:var(--r2);font-family:'Sarabun',sans-serif;font-size:13px;cursor:pointer;background:var(--sur);color:var(--tx2)}
+.nodata{text-align:center;padding:56px;color:var(--tx4);font-size:14px}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.day-card,.wcol,.mcard{animation:slideUp .16s ease both}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — MOBILE (≤ 640px)
+══════════════════════════════════════ */
+@media(max-width:640px){
+  /* ── prod bar ── */
+  .prod-tab{font-size:11px;padding:7px 0}
+  .prod-pip{width:6px;height:6px;margin-right:3px}
+
+  /* ── header ── */
+  .hdr{padding:10px 12px 0;top:30px}
+  .hdr-top{gap:8px;padding-bottom:8px}
+  .hdr-logo{width:32px;height:32px;font-size:16px}
+  .hdr-title h1{font-size:13px}
+  .hdr-title p{font-size:9px}
+  .hdr-stats{gap:10px}
+  .hstat-v{font-size:13px}
+  .hstat-l{font-size:9px}
+  .today-badge{display:none}
+  /* stack btns */
+  .hdr-btns{gap:5px;flex-wrap:wrap}
+  .hbtn{font-size:11px;padding:5px 9px;gap:3px}
+  /* hide sync text on tiny screens, keep dot */
+  #sync-badge span:last-child{display:none}
+
+  /* ── nav tabs ── scrollable row ── */
+  .nav-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0;scrollbar-width:none}
+  .nav-tabs::-webkit-scrollbar{display:none}
+  .ntab{font-size:11px;padding:8px 12px;white-space:nowrap}
+
+  /* ── toolbar ── */
+  .toolbar{padding:7px 10px;top:auto;position:relative;gap:5px}
+  .srch{min-width:100%;order:-1}
+  .fgrp{width:100%}
+  .fgrp .fbtn{flex:1;text-align:center;font-size:11px}
+  .wk-nav{width:100%;justify-content:center}
+  .wk-label{font-size:11px}
+
+  /* ── legend ── compact on mobile */
+  .pkg-legend{position:relative;top:auto;padding:6px 10px;gap:6px;flex-wrap:wrap;font-size:10px}
+  .pk-item span:last-child{font-size:10px}
+
+  /* ── month header ── */
+  .mhdr{position:relative;top:auto;padding:7px 10px}
+  .mlbl{font-size:11px}
+  .mstag{font-size:9px;padding:1px 5px}
+
+  /* ── content ── */
+  .content{padding:10px 8px}
+
+  /* ── daily cards ── */
+  .day-date-col{width:52px}
+  .dnum{font-size:18px}
+  .day-custs{padding:7px 8px;gap:5px}
+  .cpill{padding:4px 8px;gap:5px;border-radius:8px}
+  .cpill-name{font-size:11px}
+  .cpill-ton{font-size:11px}
+  .pbadge{font-size:10px;padding:1px 5px}
+  .day-sum{padding:4px 8px;gap:8px}
+
+  /* ── weekly — switch to vertical list on mobile ── */
+  /* weekly table is already row-based so mostly ok, just reduce columns */
+
+  /* ── calendar — smaller cells ── */
+  .cal-grid{gap:2px}
+  .ccell{min-height:56px;padding:3px}
+  .ccell-num{font-size:10px;margin-bottom:2px}
+  .cent{font-size:8px;padding:1px 3px}
+  .cent-name{max-width:60%}
+  .cent-ton{font-size:8px}
+  .cal-dname{font-size:9px;padding:2px}
+
+  /* ── range ── */
+  .range-controls{padding:12px;gap:10px}
+  .range-field{width:calc(50% - 5px)}
+  .range-summary{grid-template-columns:repeat(2,1fr);gap:8px;padding:12px}
+  .rs-val{font-size:16px}
+  .rs-sub{font-size:10px}
+
+  /* ── modal ── full screen on mobile ── */
+  .ov{padding:0;align-items:flex-end}
+  .modal{max-width:100%;border-radius:var(--r) var(--r) 0 0;max-height:92vh}
+  .frow-2{grid-template-columns:1fr}
+  .frow-3{grid-template-columns:1fr 1fr}
+
+  /* ── toast ── */
+  .toast{bottom:12px;right:12px;left:12px;max-width:none;font-size:12px}
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — TABLET (641–900px)
+══════════════════════════════════════ */
+@media(min-width:641px) and (max-width:900px){
+  .hdr{padding:14px 16px 0}
+  .hdr-title h1{font-size:15px}
+  .content{padding:14px 16px}
+  .today-badge{display:none}
+  .hbtn{font-size:11px;padding:5px 10px}
+  .cal-grid{gap:3px}
+  .ccell{min-height:70px;padding:4px}
+  .range-summary{grid-template-columns:repeat(3,1fr)}
+  .toolbar{padding:8px 16px}
+}
+
+/* ══ AUTH / LOCK ══ */
+.auth-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.auth-btn:hover{background:rgba(255,255,255,.22)}
+.auth-btn.unlocked{background:rgba(52,211,153,.2);border-color:rgba(52,211,153,.5);color:#34d399}
+.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.auth-box{background:var(--sur);border-radius:20px;box-shadow:0 24px 60px rgba(0,0,0,.3);width:100%;max-width:360px;overflow:hidden}
+.auth-hdr{padding:28px 24px 20px;background:linear-gradient(135deg,#064e3b,#047857);text-align:center}
+.auth-ico{font-size:40px;margin-bottom:10px}
+.auth-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px}
+.auth-sub{font-size:12px;color:rgba(255,255,255,.65)}
+.auth-body{padding:24px}
+.auth-inp-wrap{position:relative;margin-bottom:14px}
+.auth-inp{width:100%;padding:13px 44px 13px 14px;border:2px solid var(--bdr2);border-radius:12px;font-family:'Sarabun',sans-serif;font-size:16px;color:var(--tx);background:var(--sur);outline:none;transition:border-color .15s;letter-spacing:3px}
+.auth-inp:focus{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.12)}
+.auth-inp.shake{animation:shake .35s ease}
+.auth-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--tx3);font-size:18px;padding:4px;line-height:1}
+.auth-err{color:#ef4444;font-size:12px;text-align:center;margin-bottom:12px;min-height:16px;font-weight:600}
+.auth-submit{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#064e3b,#10b981);color:#fff;font-family:'Sarabun',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s}
+.auth-submit:hover{opacity:.9;box-shadow:0 6px 20px rgba(16,185,129,.3)}
+.auth-cancel{width:100%;padding:10px;border:none;background:none;color:var(--tx3);font-family:'Sarabun',sans-serif;font-size:13px;cursor:pointer;margin-top:8px;border-radius:8px;transition:background .15s}
+.auth-cancel:hover{background:var(--sur2)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+</head>
+<body>
+
+<!-- PRODUCT SWITCHER -->
+<div class="prod-bar">
+  <button class="prod-tab rg active" id="ptab-rg" onclick="switchProduct('rg')"><span class="prod-pip"></span>Refined Glycerine (RG)</button>
+  <button class="prod-tab cg" id="ptab-cg" onclick="switchProduct('cg')"><span class="prod-pip"></span>Crude Glycerine (CG)</button>
+</div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-logo">🧪</div>
+    <div class="hdr-title"><h1 id="prod-title">แจ้งแผน Refined Glycerine</h1><p id="prod-sub">RG SALES NOTIFICATION · 2026</p></div>
+    <div class="hdr-stats">
+      <div><div class="hstat-v" id="hs-days">—</div><div class="hstat-l">วันที่แจ้ง</div></div>
+      <div><div class="hstat-v" id="hs-ton">—</div><div class="hstat-l">ตันรวม</div></div>
+      <div><div class="hstat-v" id="hs-cust">—</div><div class="hstat-l">ลูกค้า</div></div>
+    </div>
+    <div class="hdr-btns">
+      <div class="today-badge" id="today-badge">—</div>
+      <!-- ปุ่มเหล่านี้ซ่อน/แสดงตาม isEditor -->
+      <label id="btn-import" class="hbtn solid" title="นำเข้าจาก Excel" style="display:none">
+        📥 นำเข้า Excel
+        <input type="file" id="xl-file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(this)">
+      </label>
+      <button id="btn-export" class="hbtn ghost" onclick="exportExcel()" style="display:none">📤 Export Excel</button>
+      <button id="btn-add" class="hbtn ghost" onclick="openAdd()" style="display:none">＋ เพิ่มแจ้งแผน</button>
+      <!-- ปุ่ม lock/unlock -->
+      <button id="auth-toggle-btn" class="auth-btn" onclick="showAuthModal()">🔒 เข้าสู่ระบบ</button>
+      <div id="sync-badge" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11px;color:rgba(255,255,255,.7);white-space:nowrap">
+        <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:#fbbf24;flex-shrink:0;display:inline-block"></span>
+        <span id="sync-txt">กำลังเชื่อมต่อ...</span>
+      </div>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="ntab on" onclick="switchTab('daily',this)">📋 รายวัน</button>
+    <button class="ntab"    onclick="switchTab('weekly',this)">📅 รายสัปดาห์</button>
+    <button class="ntab"    onclick="switchTab('monthly',this)">📊 รายเดือน</button>
+    <button class="ntab"    onclick="switchTab('calendar',this)">🗓 ปฏิทิน</button>
+    <button class="ntab"    onclick="switchTab('range',this)">📆 ช่วงเวลา</button>
+  </div>
+</header>
+
+<!-- TOOLBAR -->
+<div class="toolbar" id="toolbar">
+  <div class="srch">
+    <svg width="12" height="12" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" id="srch-inp" placeholder="ค้นหาลูกค้า...">
+  </div>
+  <div class="fgrp" id="filter-grp">
+    <button class="fbtn on" data-f="all"  onclick="setFilter(this)">ทั้งหมด</button>
+    <button class="fbtn"    data-f="has"  onclick="setFilter(this)">มีแผน</button>
+    <button class="fbtn"    data-f="week" onclick="setFilter(this)">สัปดาห์นี้</button>
+  </div>
+  <div class="wk-nav" id="wk-nav" style="display:none">
+    <button class="wk-arrow" onclick="shiftWeek(-7)">◀</button>
+    <span class="wk-label" id="wk-label">—</span>
+    <button class="wk-arrow" onclick="shiftWeek(7)">▶</button>
+  </div>
+</div>
+
+<!-- PACKAGE LEGEND — sticky full width -->
+<div class="pkg-legend" id="pkg-legend">
+  <span style="font-size:11px;font-weight:700;color:var(--tx3);font-family:'IBM Plex Mono',monospace;margin-right:4px">บรรจุภัณฑ์:</span>
+  <div class="pk-item"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4Ij48cmVjdCB4PSI2IiB5PSI4IiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHJ4PSIzIiBmaWxsPSIjMWU0MGFmIi8+PGVsbGlwc2UgY3g9IjE2IiBjeT0iOCIgcng9IjEwIiByeT0iMyIgZmlsbD0iIzNiODJmNiIvPjxlbGxpcHNlIGN4PSIxNiIgY3k9IjI4IiByeD0iMTAiIHJ5PSIzIiBmaWxsPSIjMWUzYThhIi8+PHJlY3QgeD0iNiIgeT0iMTQiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyLjUiIGZpbGw9IiMxZTNhOGEiIG9wYWNpdHk9IjAuNSIvPjxyZWN0IHg9IjYiIHk9IjIwIiB3aWR0aD0iMjAiIGhlaWdodD0iMi41IiBmaWxsPSIjMWUzYThhIiBvcGFjaXR5PSIwLjUiLz48cmVjdCB4PSI1IiB5PSI2IiB3aWR0aD0iMjIiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IiM2MGE1ZmEiLz48cmVjdCB4PSI4IiB5PSIxMCIgd2lkdGg9IjQiIGhlaWdodD0iMTQiIHJ4PSIyIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC4xMiIvPjxjaXJjbGUgY3g9IjEzIiBjeT0iOCIgcj0iMS41IiBmaWxsPSIjOTNjNWZkIi8+PGNpcmNsZSBjeD0iMTkiIGN5PSI4IiByPSIxLjUiIGZpbGw9IiM5M2M1ZmQiLz48L3N2Zz4=" width="18" height="18" style="vertical-align:middle"><span style="width:8px;height:8px;border-radius:50%;background:var(--drum-c);display:inline-block;margin-left:3px"></span><span style="color:var(--drum-c)">HDPE Drum (250 kg)</span></div>
+  <div class="pk-item"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAyNCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE0Ij48cmVjdCB4PSIxIiB5PSI0IiB3aWR0aD0iMzQiIGhlaWdodD0iMTYiIHJ4PSIxLjUiIGZpbGw9IiNkYzI2MjYiLz48cmVjdCB4PSIxIiB5PSI0IiB3aWR0aD0iMzQiIGhlaWdodD0iMTYiIHJ4PSIxLjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZjYTVhNSIgc3Ryb2tlLXdpZHRoPSIxIi8+PGxpbmUgeDE9IjkiIHkxPSI0IiB4Mj0iOSIgeTI9IjIwIiBzdHJva2U9IiNmY2E1YTUiIHN0cm9rZS13aWR0aD0iMC44Ii8+PGxpbmUgeDE9IjE3IiB5MT0iNCIgeDI9IjE3IiB5Mj0iMjAiIHN0cm9rZT0iI2ZjYTVhNSIgc3Ryb2tlLXdpZHRoPSIwLjgiLz48bGluZSB4MT0iMjUiIHkxPSI0IiB4Mj0iMjUiIHkyPSIyMCIgc3Ryb2tlPSIjZmNhNWE1IiBzdHJva2Utd2lkdGg9IjAuOCIvPjxyZWN0IHg9IjEiIHk9IjQiIHdpZHRoPSIzNCIgaGVpZ2h0PSIzIiBmaWxsPSIjYjkxYzFjIiBvcGFjaXR5PSIwLjciLz48cmVjdCB4PSIxIiB5PSIxNyIgd2lkdGg9IjM0IiBoZWlnaHQ9IjMiIGZpbGw9IiNiOTFjMWMiIG9wYWNpdHk9IjAuNyIvPjxyZWN0IHg9IjAiIHk9IjgiIHdpZHRoPSIzIiBoZWlnaHQ9IjgiIHJ4PSIxIiBmaWxsPSIjN2YxZDFkIi8+PHJlY3QgeD0iMzMiIHk9IjgiIHdpZHRoPSIzIiBoZWlnaHQ9IjgiIHJ4PSIxIiBmaWxsPSIjN2YxZDFkIi8+PHJlY3QgeD0iMTQiIHk9IjkiIHdpZHRoPSI2IiBoZWlnaHQ9IjYiIHJ4PSIxIiBmaWxsPSIjZmNhNWE1IiBvcGFjaXR5PSIwLjYiLz48L3N2Zz4=" width="20" height="14" style="vertical-align:middle"><span style="width:8px;height:8px;border-radius:50%;background:var(--flex-c);display:inline-block;margin-left:3px"></span><span style="color:var(--flex-c)">Flexibag (Container)</span></div>
+  <div class="pk-item"><span>📦</span><span style="width:8px;height:8px;border-radius:50%;background:var(--ibc-c);display:inline-block;margin-left:1px"></span><span style="color:var(--ibc-c)">IBC (1,250 kg) · เต๋า</span></div>
+  <div class="pk-item"><span>🚛</span><span style="width:8px;height:8px;border-radius:50%;background:var(--tank-c);display:inline-block;margin-left:1px"></span><span style="color:var(--tank-c)">Tank car (25T/คัน)</span></div>
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+    <span style="background:#fef3c7;border:1px solid #fde68a;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;color:#92400e">📦 แรป+พาเลท</span>
+    <span style="background:#ede9fe;border:1px solid #c4b5fd;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;color:#5b21b6">📁 โหลดเก็บ</span>
+    <span style="background:var(--wknd-bg);border:1.5px solid var(--wknd-bdr);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;color:#c2410c">เสาร์-อาทิตย์</span>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <div class="tab-panel on" id="tab-daily"></div>
+  <div class="tab-panel" id="tab-weekly"></div>
+  <div class="tab-panel" id="tab-monthly"></div>
+  <div class="tab-panel" id="tab-calendar"></div>
+  <div class="tab-panel" id="tab-range">
+    <div class="range-controls">
+      <div class="range-field"><label class="range-label">📅 วันที่เริ่มต้น</label><input type="date" id="range-start" class="range-input"></div>
+      <div class="range-field"><label class="range-label">📅 วันที่สิ้นสุด</label><input type="date" id="range-end" class="range-input"></div>
+      <button class="range-btn" onclick="renderRange()">🔍 ดูสรุป</button>
+      <button class="fbtn" onclick="setRangeMonth()">เดือนนี้</button>
+      <button class="fbtn" onclick="setRangeWeek()">สัปดาห์นี้</button>
+    </div>
+    <div id="range-summary-wrap"></div>
+    <div id="range-days" class="range-days"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div style="font-size:20px" id="t-ico">📥</div>
+  <div><div id="t-msg">—</div><div class="toast-sub" id="t-sub">—</div><div class="t-bar"><div class="t-bar-fill" id="t-bar"></div></div></div>
+</div>
+
+<!-- MODAL -->
+<div class="ov" id="ov" onclick="ovClick(event)">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="mtitle">แจ้งแผน</div><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body" id="mbody"></div>
+    <div class="modal-foot"><button class="cancelbtn" onclick="closeModal()">ยกเลิก</button><button class="sbtn" onclick="saveModal()">💾 บันทึก</button></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// PACKAGE DEFINITIONS
+// ══════════════════════════════════════════════════
+const PKG_LIST=["Drum","IBC","Tankcar","Flexibag 20.0","Flexibag 22.0","Flexibag 22.2","Flexibag 22.5","Flexibag 25.0"];
+const PKG_KG={"Drum":250,"IBC":1250,"Tankcar":25000,"Flexibag 20.0":20000,"Flexibag 22.0":22000,"Flexibag 22.2":22200,"Flexibag 22.5":22500,"Flexibag 25.0":25000};
+const PKG_UNIT={"Drum":"ถัง","IBC":"เต๋า","Tankcar":"คัน","Flexibag 20.0":"ถุง","Flexibag 22.0":"ถุง","Flexibag 22.2":"ถุง","Flexibag 22.5":"ถุง","Flexibag 25.0":"ถุง"};
+
+// Blue plastic HDPE Drum SVG
+const DRUM_ICO=`<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4Ij48cmVjdCB4PSI2IiB5PSI4IiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHJ4PSIzIiBmaWxsPSIjMWU0MGFmIi8+PGVsbGlwc2UgY3g9IjE2IiBjeT0iOCIgcng9IjEwIiByeT0iMyIgZmlsbD0iIzNiODJmNiIvPjxlbGxpcHNlIGN4PSIxNiIgY3k9IjI4IiByeD0iMTAiIHJ5PSIzIiBmaWxsPSIjMWUzYThhIi8+PHJlY3QgeD0iNiIgeT0iMTQiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyLjUiIGZpbGw9IiMxZTNhOGEiIG9wYWNpdHk9IjAuNSIvPjxyZWN0IHg9IjYiIHk9IjIwIiB3aWR0aD0iMjAiIGhlaWdodD0iMi41IiBmaWxsPSIjMWUzYThhIiBvcGFjaXR5PSIwLjUiLz48cmVjdCB4PSI1IiB5PSI2IiB3aWR0aD0iMjIiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IiM2MGE1ZmEiLz48cmVjdCB4PSI4IiB5PSIxMCIgd2lkdGg9IjQiIGhlaWdodD0iMTQiIHJ4PSIyIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC4xMiIvPjxjaXJjbGUgY3g9IjEzIiBjeT0iOCIgcj0iMS41IiBmaWxsPSIjOTNjNWZkIi8+PGNpcmNsZSBjeD0iMTkiIGN5PSI4IiByPSIxLjUiIGZpbGw9IiM5M2M1ZmQiLz48L3N2Zz4=" width="16" height="16" style="vertical-align:middle;margin-right:2px">`;
+
+// Red shipping container SVG for Flexibag
+const FLEX_ICO=`<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAyNCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE0Ij48cmVjdCB4PSIxIiB5PSI0IiB3aWR0aD0iMzQiIGhlaWdodD0iMTYiIHJ4PSIxLjUiIGZpbGw9IiNkYzI2MjYiLz48cmVjdCB4PSIxIiB5PSI0IiB3aWR0aD0iMzQiIGhlaWdodD0iMTYiIHJ4PSIxLjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZjYTVhNSIgc3Ryb2tlLXdpZHRoPSIxIi8+PGxpbmUgeDE9IjkiIHkxPSI0IiB4Mj0iOSIgeTI9IjIwIiBzdHJva2U9IiNmY2E1YTUiIHN0cm9rZS13aWR0aD0iMC44Ii8+PGxpbmUgeDE9IjE3IiB5MT0iNCIgeDI9IjE3IiB5Mj0iMjAiIHN0cm9rZT0iI2ZjYTVhNSIgc3Ryb2tlLXdpZHRoPSIwLjgiLz48bGluZSB4MT0iMjUiIHkxPSI0IiB4Mj0iMjUiIHkyPSIyMCIgc3Ryb2tlPSIjZmNhNWE1IiBzdHJva2Utd2lkdGg9IjAuOCIvPjxyZWN0IHg9IjEiIHk9IjQiIHdpZHRoPSIzNCIgaGVpZ2h0PSIzIiBmaWxsPSIjYjkxYzFjIiBvcGFjaXR5PSIwLjciLz48cmVjdCB4PSIxIiB5PSIxNyIgd2lkdGg9IjM0IiBoZWlnaHQ9IjMiIGZpbGw9IiNiOTFjMWMiIG9wYWNpdHk9IjAuNyIvPjxyZWN0IHg9IjAiIHk9IjgiIHdpZHRoPSIzIiBoZWlnaHQ9IjgiIHJ4PSIxIiBmaWxsPSIjN2YxZDFkIi8+PHJlY3QgeD0iMzMiIHk9IjgiIHdpZHRoPSIzIiBoZWlnaHQ9IjgiIHJ4PSIxIiBmaWxsPSIjN2YxZDFkIi8+PHJlY3QgeD0iMTQiIHk9IjkiIHdpZHRoPSI2IiBoZWlnaHQ9IjYiIHJ4PSIxIiBmaWxsPSIjZmNhNWE1IiBvcGFjaXR5PSIwLjYiLz48L3N2Zz4=" width="18" height="13" style="vertical-align:middle;margin-right:2px">`;
+
+const PKG_ICO={
+  "Drum":DRUM_ICO,
+  "IBC":"📦",
+  "Tankcar":"🚛",
+  "Flexibag 20.0":FLEX_ICO,"Flexibag 22.0":FLEX_ICO,"Flexibag 22.2":FLEX_ICO,
+  "Flexibag 22.5":FLEX_ICO,"Flexibag 25.0":FLEX_ICO,
+};
+const PKG_CLS={"Drum":"drum","IBC":"ibc","Tankcar":"tank","Flexibag 20.0":"flex","Flexibag 22.0":"flex","Flexibag 22.2":"flex","Flexibag 22.5":"flex","Flexibag 25.0":"flex"};
+
+function calcQty(pkg,ton){
+  if(!pkg||ton==null) return null;
+  const kg=PKG_KG[pkg];
+  if(!kg) return null;
+  return Math.ceil(ton*1000/kg);
+}
+
+// ══════════════════════════════════════════════════
+// DATA
+// entry: {Ton, Pkg, Qty?, Remark?, LoadDate?}
+// ══════════════════════════════════════════════════
+let CUSTOMERS=["RAK","WEIFANG","JINGDE COUNTY","Yijie","Robanrusholeo",
+  "Innoleo chris","PPRY","ศักดิพิรุณณ์","สยามลีดเดอร์","Bizwell","KOVIC",
+  "Thanachem","Sherwood","Siam Ab","Union Compound","LinQtec","Urekote","เพื่อนแท้เคมีภัณฑ์"];
+
+// ── Crude Glycerine customers — shared with RG (same list)
+// CG_CUSTOMERS is a reference to the same CUSTOMERS array
+function getCGCustomers(){ return CUSTOMERS; }
+
+// ── Active product: 'rg' | 'cg'
+let activeProduct='rg';
+
+let DATA={
+"2026-03-01":{"RAK":{"Ton":45,"Pkg":"Flexibag 22.5","Qty":2}},
+"2026-03-05":{"เพื่อนแท้เคมีภัณฑ์":{"Ton":2.5,"Pkg":"Drum","Qty":10,"Remark":"แรป+พาเลท"}},
+"2026-03-09":{"Union Compound":{"Ton":10,"Pkg":"Drum","Qty":40,"Remark":"แรป+พาเลท"},"LinQtec":{"Ton":7,"Pkg":"Drum","Qty":28,"Remark":"แรป+พาเลท"}},
+"2026-03-10":{"WEIFANG":{"Ton":150,"Pkg":"Flexibag 22.5","Qty":7},"ศักดิพิรุณณ์":{"Ton":20,"Pkg":"Tankcar","Qty":1,"Remark":"แรป+พาเลท"}},
+"2026-03-11":{"WEIFANG":{"Ton":150,"Pkg":"Flexibag 22.5","Qty":7}},
+"2026-03-12":{"Innoleo chris":{"Ton":111,"Pkg":"Flexibag 22.5","Qty":5},"Siam Ab":{"Ton":0.25,"Pkg":"Tankcar","Qty":1},"PPRY":{"Ton":5,"Pkg":"Drum","Qty":20}},
+"2026-03-13":{"Innoleo chris":{"Ton":88,"Pkg":"Flexibag 22.5","Qty":4},"PPRY":{"Ton":2,"Pkg":"Drum","Qty":8},"ศักดิพิรุณณ์":{"Ton":25,"Pkg":"Tankcar","Qty":1,"Remark":"โหลดเก็บ","LoadDate":"2026-03-13"}},
+"2026-03-16":{"RAK":{"Ton":112.5,"Pkg":"Flexibag 22.5","Qty":5},"JINGDE COUNTY":{"Ton":22,"Pkg":"Flexibag 22.5","Qty":1}},
+"2026-03-17":{"RAK":{"Ton":90,"Pkg":"Flexibag 22.5","Qty":4},"Thanachem":{"Ton":10,"Pkg":"Drum","Qty":40}},
+"2026-03-18":{"ศักดิพิรุณณ์":{"Ton":20,"Pkg":"Tankcar","Qty":1,"Remark":"แรป+พาเลท"}},
+"2026-03-19":{"ศักดิพิรุณณ์":{"Ton":20,"Pkg":"Tankcar","Qty":1,"Remark":"แรป+พาเลท"}},
+"2026-03-20":{"Bizwell":{"Ton":10,"Pkg":"Drum","Qty":40},"KOVIC":{"Ton":0.5,"Pkg":"Drum","Qty":2}},
+"2026-03-21":{"WEIFANG":{"Ton":175,"Pkg":"Flexibag 25.0","Qty":7}},
+"2026-03-22":{"Robanrusholeo":{"Ton":100,"Pkg":"Flexibag 22.5","Qty":5},"WEIFANG":{"Ton":75,"Pkg":"Flexibag 25.0","Qty":3}},
+"2026-03-24":{"RAK":{"Ton":45,"Pkg":"Flexibag 22.5","Qty":2}},
+"2026-03-25":{"Bizwell":{"Ton":20,"Pkg":"Drum","Qty":80,"Remark":"โหลดเก็บ","LoadDate":"2026-03-26"}},
+"2026-03-26":{"RAK":{"Ton":157.5,"Pkg":"Flexibag 22.5","Qty":7},"JINGDE COUNTY":{"Ton":66,"Pkg":"Flexibag 22.5","Qty":3},"Urekote":{"Ton":5,"Pkg":"IBC","Qty":4}},
+"2026-03-27":{"RAK":{"Ton":67.5,"Pkg":"Flexibag 22.5","Qty":3},"ศักดิพิรุณณ์":{"Ton":25,"Pkg":"Tankcar","Qty":1}},
+"2026-03-28":{"JINGDE COUNTY":{"Ton":66,"Pkg":"Flexibag 22.5","Qty":3}},
+"2026-03-29":{"Yijie":{"Ton":200,"Pkg":"Flexibag 22.5","Qty":9}},
+"2026-03-30":{"Sherwood":{"Ton":1,"Pkg":"Drum","Qty":4},"Bizwell":{"Ton":10,"Pkg":"Drum","Qty":40}},
+"2026-03-31":{"สยามลีดเดอร์":{"Ton":133.2,"Pkg":"IBC","Qty":107}},
+"2026-04-01":{"JINGDE COUNTY":{"Ton":66.6,"Pkg":"Flexibag 22.5","Qty":3}},
+"2026-04-15":{"Yijie":{"Ton":337.5,"Pkg":"Flexibag 25.0","Qty":14}},
+};
+
+// ── Crude Glycerine DATA (separate)
+let CG_DATA={};
+
+// generate all dates Mar–Jun 2026
+const ALL_DATES=(()=>{const ds=[];const s=new Date('2026-03-01'),e=new Date('2026-06-30');for(let d=new Date(s);d<=e;d.setDate(d.getDate()+1))ds.push(d.toISOString().slice(0,10));return ds})();
+const MTH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const WD=['อา','จ','อ','พ','พฤ','ศ','ส'];
+const WDF=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const TODAY=new Date().toISOString().slice(0,10);
+
+// calendar customer colour map (individual colours)
+const CPAL=['cc0','cc1','cc2','cc3','cc4','cc5','cc6','cc7','cc8','cc9','cc10','cc11','cc12','cc13','cc14','cc15','cc16','cc17'];
+const CMAP_CAL={};let calCI=0;
+function ccCal(n){if(!CMAP_CAL[n])CMAP_CAL[n]=CPAL[calCI++%CPAL.length];return CMAP_CAL[n]}
+
+let activeTab='daily',activeFilter='all',srch='',weekStart=getMonday(TODAY);
+let mDate=null,ceIdx=0;
+
+// ── Active data getters (switch between RG and CG)
+function getActiveData(){return activeProduct==='rg'?DATA:CG_DATA}
+function getActiveCustomers(){return CUSTOMERS;} // Both RG and CG share same customer list
+
+// ── Product switcher
+function switchProduct(prod){
+  activeProduct=prod;
+  document.getElementById('ptab-rg').classList.toggle('active',prod==='rg');
+  document.getElementById('ptab-cg').classList.toggle('active',prod==='cg');
+  const isRG=prod==='rg';
+  document.getElementById('prod-title').textContent=isRG?'แจ้งแผน Refined Glycerine':'แจ้งแผน Crude Glycerine';
+  document.getElementById('prod-sub').textContent=isRG?'RG SALES NOTIFICATION · 2026':'CG SALES NOTIFICATION · 2026';
+  // update header gradient
+  document.querySelector('.hdr').style.background=isRG?'linear-gradient(135deg,#064e3b,#047857)':'linear-gradient(135deg,#7c2d12,#c2410c)';
+  updateStats();
+  renderTab(activeTab);
+}
+
+function getMonday(ds){const d=new Date(ds),day=d.getDay();d.setDate(d.getDate()-day+(day===0?-6:1));return d.toISOString().slice(0,10)}
+function hasPlan(d){return Object.keys(getActiveData()[d]||{}).length>0}
+function fT(v){return v==null?'—':(v%1===0?v+' T':v.toFixed(1)+' T')}
+
+function dayTotals(d){
+  let ton=0,drum=0,flex=0,ibc=0,tank=0;
+  Object.values(getActiveData()[d]||{}).forEach(u=>{
+    ton+=u.Ton||0;
+    const q=u.Qty||calcQty(u.Pkg,u.Ton)||0,p=u.Pkg||'';
+    if(p==='Drum') drum+=q;
+    else if(p==='IBC') ibc+=q;
+    else if(p==='Tankcar') tank+=q;
+    else if(p.startsWith('Flexibag')) flex+=q;
+  });
+  return{ton,drum,flex,ibc,tank};
+}
+function matchSrch(d){if(!srch)return true;return Object.keys(getActiveData()[d]||{}).some(c=>c.toLowerCase().includes(srch.toLowerCase()))}
+function getFiltered(){
+  let ds=ALL_DATES;
+  if(activeFilter==='has')ds=ds.filter(hasPlan);
+  if(activeFilter==='week'){const ws=new Date(weekStart),we=new Date(ws);we.setDate(we.getDate()+6);ds=ds.filter(d=>{const dt=new Date(d);return dt>=ws&&dt<=we})}
+  if(srch)ds=ds.filter(matchSrch);
+  return ds;
+}
+
+function updateStats(){
+  let nD=0,nT=0;const nC=new Set();
+  ALL_DATES.forEach(d=>{const custs=getActiveData()[d]||{};if(Object.keys(custs).length){nD++;Object.entries(custs).forEach(([c,u])=>{nT+=u.Ton||0;nC.add(c)})}});
+  document.getElementById('hs-days').textContent=nD;
+  document.getElementById('hs-ton').textContent=nT.toFixed(0);
+  document.getElementById('hs-cust').textContent=nC.size;
+}
+
+// ── package badge HTML ──
+function pkgBadgeHtml(u){
+  const p=u.Pkg||'',q=u.Qty,cls=PKG_CLS[p]||'',unit=PKG_UNIT[p]||'';
+  if(!p) return '';
+  const ico=PKG_ICO[p]||'📦';
+  const name=p==='Drum'?'HDPE Drum':p==='Tankcar'?'Tank car':p;
+  const qStr=q?` ${q} ${unit}`:'';
+  // Drum and Flexibag use SVG img tags; others use emoji
+  const icoHtml=(p==='Drum'||p.startsWith('Flexibag'))?ico:`<span style="font-size:13px;line-height:1;margin-right:2px">${ico}</span>`;
+  return `<span class="pbadge ${cls}">${icoHtml}<span style="vertical-align:middle">${name}${qStr}</span></span>`;
+}
+function remTagHtml(u){
+  if(!u.Remark||u.Remark==='—ไม่มี—') return '';
+  if(u.Remark==='โหลดเก็บ'){const ld=u.LoadDate?' ('+u.LoadDate.slice(8)+'/'+u.LoadDate.slice(5,7)+')':'';return `<span class="rem-tag store">📁 โหลดเก็บ${ld}</span>`}
+  return `<span class="rem-tag wrap">📦 แรป+พาเลท</span>`;
+}
+function sumStripHtml(d){
+  const t=dayTotals(d);if(!t.ton)return '';
+  const items=[
+    t.drum?`<div class="sum-item">${DRUM_ICO}<span class="sum-num" style="color:var(--drum-c)">${t.drum}</span><span class="sum-lbl"> ถัง</span></div>`:'',
+    t.flex?`<div class="sum-item">${FLEX_ICO}<span class="sum-num" style="color:var(--flex-c)">${t.flex}</span><span class="sum-lbl"> ถุง</span></div>`:'',
+    t.ibc?`<div class="sum-item"><span class="sum-ico">📦</span><span class="sum-num" style="color:var(--ibc-c)">${t.ibc}</span><span class="sum-lbl"> IBC</span></div>`:'',
+    t.tank?`<div class="sum-item"><span class="sum-ico">🚛</span><span class="sum-num" style="color:var(--tank-c)">${t.tank}</span><span class="sum-lbl"> คัน</span></div>`:'',
+  ].filter(Boolean).join('');
+  if(!items)return '';
+  return `<div class="day-sum">${items}<div class="sum-total">⚖️ ${fT(t.ton)}</div></div>`;
+}
+
+// ══ DAILY ══
+function renderDaily(){
+  const el=document.getElementById('tab-daily');el.innerHTML='';
+  const dates=getFiltered();if(!dates.length){el.innerHTML='<div class="nodata">ไม่พบข้อมูล</div>';return}
+  const months={};dates.forEach(d=>{const m=d.slice(0,7);if(!months[m])months[m]=[];months[m].push(d)});
+  Object.entries(months).forEach(([mo,moDates])=>{
+    const[yr,m]=mo.split('-');
+    let mT=0,mDr=0,mFl=0,mIB=0,mTk=0;
+    moDates.forEach(d=>{const t=dayTotals(d);mT+=t.ton;mDr+=t.drum;mFl+=t.flex;mIB+=t.ibc;mTk+=t.tank});
+    const tags=[mT?`<span class="mstag">⚖️ ${mT.toFixed(1)} T</span>`:'',mDr?`<span class="mstag">${DRUM_ICO}<span style="vertical-align:middle">${mDr} ถัง</span></span>`:'',mFl?`<span class="mstag">${FLEX_ICO}<span style="vertical-align:middle">${mFl} ถุง</span></span>`:'',mIB?`<span class="mstag">📦 ${mIB} IBC</span>`:'',mTk?`<span class="mstag">🚛 ${mTk} คัน</span>`:''].filter(Boolean).join('');
+    const sec=document.createElement('div');sec.className='msec';
+    sec.innerHTML=`<div class="mhdr"><span class="mlbl">${MTH[+m-1]} ${yr}</span><div class="mline"></div><div style="display:flex;gap:5px;flex-wrap:wrap">${tags}</div></div>`;
+    const list=document.createElement('div');list.className='day-list';
+    moDates.forEach((d,idx)=>{
+      const dt=new Date(d),dow=dt.getDay(),isToday=d===TODAY,wknd=dow===0||dow===6;
+      const custs=getActiveData()[d]||{},hasP=Object.keys(custs).length>0;
+      const card=document.createElement('div');
+      card.className=`day-card ${wknd?'is-wknd':''} ${isToday?'is-today':''} ${!hasP?'no-plan':''}`.trim();
+      card.style.animationDelay=`${idx*8}ms`;
+      const pills=Object.entries(custs).map(([c,u])=>`
+        <div class="cpill">
+          <span class="cpill-dot"></span>
+          <span class="cpill-name">${c}</span>
+          <span class="cpill-ton">${fT(u.Ton)}</span>
+          <div class="cpill-pkgs">${pkgBadgeHtml(u)}${remTagHtml(u)}</div>
+        </div>`).join('');
+      card.innerHTML=`
+        <div class="day-hdr">
+          <div class="day-date-col">
+            <div class="dnum">${String(dt.getDate()).padStart(2,'0')}</div>
+            <div class="dwd">${WD[dow]}</div>
+            ${isToday?'<span class="pip today">TODAY</span>':''}
+            ${wknd&&!isToday?'<span class="pip wknd">WKND</span>':''}
+          </div>
+          <div class="day-custs">
+            ${hasP?pills:'<span class="no-plan-txt">— ไม่มีแผนวันนี้ —</span>'}
+            ${hasP?`<button class="edit-btn" onclick="openEdit('${d}')" style="${isEditor?'':'display:none'}">✏️</button>`:''}
+          </div>
+        </div>
+        ${sumStripHtml(d)}`;
+      list.appendChild(card);
+    });
+    sec.appendChild(list);el.appendChild(sec);
+  });
+  setTimeout(()=>{const t=document.querySelector('.day-card.is-today');if(t){t.classList.add('open');t.scrollIntoView({behavior:'smooth',block:'center'})}},100);
+}
+
+// ══ WEEKLY ══
+function renderWeekly(){
+  const el=document.getElementById('tab-weekly');el.innerHTML='';
+  const ws=new Date(weekStart),we=new Date(ws);we.setDate(we.getDate()+6);
+  const wDates=[];for(let d=new Date(ws);d<=we;d.setDate(d.getDate()+1))wDates.push(d.toISOString().slice(0,10));
+  const lbl=document.getElementById('wk-label');
+  if(lbl)lbl.textContent=`${ws.getDate()} ${MTH[ws.getMonth()]} – ${we.getDate()} ${MTH[we.getMonth()]} ${we.getFullYear()}`;
+  let wT=0,wDr=0,wFl=0,wIB=0,wTk=0;
+
+  // Build table: each day = 1 row
+  const tblOuter=document.createElement('div');
+  tblOuter.className='week-tbl-wrap';
+  const tbl=document.createElement('div');
+  tbl.style.cssText='background:var(--sur);border-radius:var(--r);border:1.5px solid var(--bdr);overflow:hidden;box-shadow:var(--s1);margin-bottom:16px;min-width:600px';
+
+  // Header row
+  const hdr=document.createElement('div');
+  hdr.style.cssText='display:grid;grid-template-columns:80px 1fr 90px 90px 90px 90px 90px;background:linear-gradient(135deg,#064e3b,#047857);padding:8px 12px;gap:8px;align-items:center';
+  hdr.innerHTML=`
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.8);font-family:'IBM Plex Mono',monospace">วันที่</div>
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.8)">ลูกค้า / บรรจุภัณฑ์</div>
+    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.75);text-align:right">⚖️ ตัน</div>
+    <div style="font-size:10px;font-weight:700;color:#93c5fd;text-align:right">🔵 Drum (ถัง)</div>
+    <div style="font-size:10px;font-weight:700;color:#67e8f9;text-align:right">📦 Flex (ถุง)</div>
+    <div style="font-size:10px;font-weight:700;color:#6ee7b7;text-align:right">📦 IBC (เต๋า)</div>
+    <div style="font-size:10px;font-weight:700;color:#c4b5fd;text-align:right">🚛 Tank (คัน)</div>`;
+  tbl.appendChild(hdr);
+
+  wDates.forEach((d,i)=>{
+    const dt=new Date(d),dow=dt.getDay(),isToday=d===TODAY,wknd=dow===0||dow===6;
+    const custs=getActiveData()[d]||{};const t=dayTotals(d);
+    wT+=t.ton;wDr+=t.drum;wFl+=t.flex;wIB+=t.ibc;wTk+=t.tank;
+    const hasCusts=Object.keys(custs).length>0;
+
+    const row=document.createElement('div');
+    const rowBg=isToday?'#f0fdf4':wknd?'var(--wknd-bg)':i%2?'var(--sur2)':'var(--sur)';
+    row.style.cssText=`display:grid;grid-template-columns:80px 1fr 90px 90px 90px 90px 90px;padding:10px 12px;gap:8px;align-items:start;border-top:1px solid var(--bdr);background:${rowBg};${isToday?'box-shadow:inset 3px 0 0 #10b981':''}`;
+
+    // Date cell
+    const dateCell=document.createElement('div');
+    dateCell.innerHTML=`<div style="font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:700;line-height:1;color:${isToday?'#047857':wknd?'#c2410c':'var(--tx)'}">${String(dt.getDate()).padStart(2,'0')}</div>
+      <div style="font-size:10px;font-weight:700;color:${wknd?'#c2410c':'var(--tx3)'};margin-top:2px">${WD[dow]} ${MTH[dt.getMonth()]}</div>
+      ${isToday?'<span style="background:#10b981;color:#fff;font-size:8px;padding:1px 4px;border-radius:3px;font-family:monospace;font-weight:700;display:inline-block;margin-top:2px">TODAY</span>':''}
+      ${wknd&&!isToday?'<span style="background:#ea580c;color:#fff;font-size:8px;padding:1px 4px;border-radius:3px;font-family:monospace;font-weight:700;display:inline-block;margin-top:2px">WKND</span>':''}`;
+    row.appendChild(dateCell);
+
+    // Customers cell
+    const custCell=document.createElement('div');
+    custCell.style.cssText='display:flex;flex-wrap:wrap;gap:5px;align-items:flex-start';
+    if(hasCusts){
+      Object.entries(custs).forEach(([c,u])=>{
+        const pill=document.createElement('div');
+        pill.style.cssText='display:flex;align-items:center;gap:5px;background:var(--cust-bg);border:1.5px solid var(--cust-bd);border-radius:8px;padding:4px 9px;flex-shrink:0';
+        pill.innerHTML=`<span style="width:7px;height:7px;border-radius:50%;background:var(--cust-c);flex-shrink:0;display:inline-block"></span>
+          <span style="font-size:11px;font-weight:700;color:var(--cust-c)">${c}</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--tx2)">${fT(u.Ton)}</span>
+          ${pkgBadgeHtml(u)}${remTagHtml(u)?`<span style="margin-left:2px">${remTagHtml(u)}</span>`:''}`;
+        custCell.appendChild(pill);
+      });
+    } else {
+      custCell.innerHTML='<span style="color:var(--tx4);font-size:11px;font-style:italic">— ไม่มีแผน —</span>';
+    }
+    row.appendChild(custCell);
+
+    // Summary cols — show values or dash
+    const cols=[
+      {v:t.ton,fmt:v=>v.toFixed(1)+' T',color:'var(--acc)'},
+      {v:t.drum,fmt:v=>v+' ถัง',color:'var(--drum-c)'},
+      {v:t.flex,fmt:v=>v+' ถุง',color:'var(--flex-c)'},
+      {v:t.ibc,fmt:v=>v,color:'var(--ibc-c)'},
+      {v:t.tank,fmt:v=>v+' คัน',color:'var(--tank-c)'},
+    ];
+    cols.forEach(({v,fmt,color})=>{
+      const cell=document.createElement('div');
+      cell.style.cssText=`text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:${v?'700':'400'};color:${v?color:'var(--tx4)'};padding-top:4px`;
+      cell.textContent=v?fmt(v):'—';
+      row.appendChild(cell);
+    });
+
+    tbl.appendChild(row);
+  });
+
+  // Week totals row
+  const totRow=document.createElement('div');
+  totRow.style.cssText='display:grid;grid-template-columns:80px 1fr 90px 90px 90px 90px 90px;padding:10px 12px;gap:8px;align-items:center;background:linear-gradient(135deg,#064e3b,#047857);border-top:2px solid #047857';
+  totRow.innerHTML=`
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.8);font-family:'IBM Plex Mono',monospace">สัปดาห์</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.7)">${wDates.filter(hasPlan).length} วันที่มีแผน</div>
+    <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#34d399">${wT.toFixed(1)} T</div>
+    <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#93c5fd">${wDr||'—'}</div>
+    <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#67e8f9">${wFl||'—'}</div>
+    <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#6ee7b7">${wIB||'—'}</div>
+    <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#c4b5fd">${wTk||'—'}</div>`;
+  tbl.appendChild(totRow);
+  tblOuter.appendChild(tbl);
+  el.appendChild(tblOuter);
+}
+function shiftWeek(d){const dt=new Date(weekStart);dt.setDate(dt.getDate()+d);weekStart=dt.toISOString().slice(0,10);renderWeekly()}
+
+// ══ MONTHLY ══ — 4-column card grid (like screenshot) + collapsible day table
+function renderMonthly(){
+  const el=document.getElementById('tab-monthly');el.innerHTML='';
+  const months={};ALL_DATES.forEach(d=>{const m=d.slice(0,7);if(!months[m])months[m]=[];months[m].push(d)});
+
+  // Card grid wrapper — 4 columns like screenshot
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:20px';
+
+  Object.entries(months).forEach(([mo,moDates])=>{
+    const[yr,m]=mo.split('-');
+    let mT=0,mDr=0,mFl=0,mIB=0,mTk=0,nDays=0;
+    const custMap={};
+    moDates.forEach(d=>{
+      const t=dayTotals(d);mT+=t.ton;mDr+=t.drum;mFl+=t.flex;mIB+=t.ibc;mTk+=t.tank;
+      if(hasPlan(d))nDays++;
+      Object.entries(getActiveData()[d]||{}).forEach(([c,u])=>{
+        if(!custMap[c])custMap[c]={ton:0,drum:0,flex:0,ibc:0,tank:0};
+        custMap[c].ton+=u.Ton||0;
+        const q=u.Qty||calcQty(u.Pkg,u.Ton)||0,p=u.Pkg||'';
+        if(p==='Drum')custMap[c].drum+=q;
+        else if(p==='IBC')custMap[c].ibc+=q;
+        else if(p==='Tankcar')custMap[c].tank+=q;
+        else if(p.startsWith('Flexibag'))custMap[c].flex+=q;
+      });
+    });
+    const sortedC=Object.entries(custMap).sort((a,b)=>b[1].ton-a[1].ton);
+    const maxT=sortedC[0]?.[1]?.ton||1;
+    const hasData=nDays>0;
+    const moId=`mo-${mo.replace('-','')}`;
+
+    // pkg badges
+    const pkgBadges=[
+      mDr?`<span style="display:inline-flex;align-items:center;gap:3px;background:var(--drum-l);border:1px solid var(--drum-m);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--drum-c)">${DRUM_ICO}<span style="vertical-align:middle">${mDr}</span></span>`:'',
+      mFl?`<span style="display:inline-flex;align-items:center;gap:3px;background:var(--flex-l);border:1px solid var(--flex-m);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--flex-c)">${FLEX_ICO}<span style="vertical-align:middle">${mFl}</span></span>`:'',
+      mIB?`<span style="background:var(--ibc-l);border:1px solid var(--ibc-m);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--ibc-c)">📦 ${mIB}</span>`:'',
+      mTk?`<span style="background:var(--tank-l);border:1px solid var(--tank-m);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--tank-c)">🚛 ${mTk}</span>`:'',
+    ].filter(Boolean).join('');
+
+    // customer rows (max 8, sorted by ton, individual colour)
+    const custRows=sortedC.map(([c,v])=>{
+      const cls=ccCal(c);
+      const pct=Math.max(4,(v.ton/maxT*100)).toFixed(0);
+      return `<div class="${cls}" style="display:flex;align-items:center;gap:7px;padding:3px 0">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--cc);flex-shrink:0;display:inline-block"></span>
+        <span style="font-size:11px;font-weight:700;color:var(--cc);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${c}</span>
+        <div style="width:80px;height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;flex-shrink:0">
+          <div style="height:100%;width:${pct}%;background:var(--cc);border-radius:2px"></div>
+        </div>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tx3);min-width:42px;text-align:right">${v.ton.toFixed(1)}T</span>
+      </div>`;
+    }).join('');
+    const moreC='';
+
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--sur);border-radius:var(--r);border:1.5px solid var(--bdr);box-shadow:var(--s1);overflow:hidden;display:flex;flex-direction:column';
+    card.innerHTML=`
+      <!-- card header -->
+      <div style="padding:12px 14px 10px;border-bottom:1px solid var(--bdr)">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
+          <span style="width:10px;height:10px;border-radius:50%;background:var(--acc);flex-shrink:0;display:inline-block"></span>
+          <span style="font-size:13px;font-weight:700;color:var(--tx);font-family:'IBM Plex Mono',monospace">${MTH[+m-1]} ${yr}</span>
+          ${hasData?`<button onclick="toggleMonthTable('${moId}','${mo}',${JSON.stringify(moDates)})" style="margin-left:auto;padding:2px 8px;font-size:10px;border-radius:5px;border:1.5px solid var(--bdr2);background:var(--sur2);color:var(--tx3);cursor:pointer;font-family:'Sarabun',sans-serif">📋 ดูรายวัน</button>`:''}
+        </div>
+        ${hasData?`
+        <!-- stats row -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+          <div style="background:var(--acc-l);border-radius:var(--r2);padding:8px;text-align:center">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--acc);line-height:1">${mT.toFixed(1)}</div>
+            <div style="font-size:9px;color:var(--tx3);margin-top:2px">ตันรวม</div>
+          </div>
+          <div style="background:var(--sur2);border-radius:var(--r2);padding:8px;text-align:center">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#3b82f6;line-height:1">${nDays}</div>
+            <div style="font-size:9px;color:var(--tx3);margin-top:2px">วันที่แจ้ง</div>
+          </div>
+          <div style="background:var(--sur2);border-radius:var(--r2);padding:8px;text-align:center">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#8b5cf6;line-height:1">${sortedC.length}</div>
+            <div style="font-size:9px;color:var(--tx3);margin-top:2px">ลูกค้า</div>
+          </div>
+        </div>
+        <!-- pkg badges -->
+        ${pkgBadges?`<div style="display:flex;gap:5px;flex-wrap:wrap">${pkgBadges}</div>`:''}
+        `:`<div style="color:var(--tx4);font-size:12px;font-style:italic;text-align:center;padding:16px 0">ไม่มีแผน</div>`}
+      </div>
+      <!-- customer list -->
+      ${hasData&&sortedC.length?`
+      <div style="padding:10px 14px;flex:1">
+        ${custRows}${moreC}
+      </div>`:''}
+      <!-- collapsible day table (lazy — built on click) -->
+      <div id="${moId}" style="display:none;border-top:1px solid var(--bdr)"></div>`;
+    grid.appendChild(card);
+  });
+
+  el.appendChild(grid);
+}
+
+function toggleMonthTable(id,mo,moDates){
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(el.style.display==='none'){
+    // Build day table lazily on first open
+    if(!el.dataset.built){
+      el.innerHTML=buildMonthDayTable(mo,moDates);
+      el.dataset.built='1';
+    }
+    el.style.display='block';
+  } else {
+    el.style.display='none';
+  }
+}
+
+function buildMonthDayTable(mo,moDates){
+  // Returns HTML string for the day table
+  const[yr,m]=mo.split('-');
+  let rows='';
+  moDates.forEach((d,i)=>{
+    const dt=new Date(d),dow=dt.getDay(),isToday=d===TODAY,wknd=dow===0||dow===6;
+    const custs=getActiveData()[d]||{};const t=dayTotals(d);
+    const hasCusts=Object.keys(custs).length>0;
+    const rowBg=isToday?'#f0fdf4':wknd?'var(--wknd-bg)':i%2?'var(--sur2)':'var(--sur)';
+    const pills=Object.entries(custs).map(([c,u])=>`
+      <span style="display:inline-flex;align-items:center;gap:4px;background:var(--cust-bg);border:1.5px solid var(--cust-bd);border-radius:7px;padding:2px 7px;flex-shrink:0;margin:1px">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--cust-c);display:inline-block"></span>
+        <span style="font-size:10px;font-weight:700;color:var(--cust-c)">${c}</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tx2)">${fT(u.Ton)}</span>
+        ${pkgBadgeHtml(u)}
+      </span>`).join('');
+    rows+=`<div style="display:grid;grid-template-columns:52px 1fr 70px 70px 70px 60px 60px;padding:6px 10px;gap:4px;align-items:center;border-top:1px solid var(--bdr);background:${rowBg};${isToday?'box-shadow:inset 3px 0 0 #10b981':''}">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:${isToday?'#047857':wknd?'#c2410c':'var(--tx)'}">
+        ${String(dt.getDate()).padStart(2,'0')}<span style="font-size:9px;font-weight:600;color:${wknd?'#c2410c':'var(--tx3)'};display:block">${WD[dow]}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:2px;align-items:center">${hasCusts?pills:'<span style="color:var(--tx4);font-size:10px;font-style:italic">—</span>'}</div>
+      <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:${t.ton?'700':'400'};color:${t.ton?'var(--acc)':'var(--tx4)'}">${t.ton?t.ton.toFixed(1)+' T':'—'}</div>
+      <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:${t.drum?'700':'400'};color:${t.drum?'var(--drum-c)':'var(--tx4)'}">${t.drum||'—'}</div>
+      <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:${t.flex?'700':'400'};color:${t.flex?'var(--flex-c)':'var(--tx4)'}">${t.flex||'—'}</div>
+      <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:${t.ibc?'700':'400'};color:${t.ibc?'var(--ibc-c)':'var(--tx4)'}">${t.ibc||'—'}</div>
+      <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:${t.tank?'700':'400'};color:${t.tank?'var(--tank-c)':'var(--tx4)'}">${t.tank||'—'}</div>
+    </div>`;
+  });
+  return `<div style="background:linear-gradient(135deg,#064e3b,#047857);display:grid;grid-template-columns:52px 1fr 70px 70px 70px 60px 60px;padding:5px 10px;gap:4px">
+    <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.7);font-family:'IBM Plex Mono',monospace">วัน</div>
+    <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.7)">ลูกค้า</div>
+    <div style="text-align:right;font-size:9px;font-weight:700;color:rgba(255,255,255,.7)">ตัน</div>
+    <div style="text-align:right;font-size:9px;font-weight:700;color:#93c5fd">Drum</div>
+    <div style="text-align:right;font-size:9px;font-weight:700;color:#fca5a5">Flex</div>
+    <div style="text-align:right;font-size:9px;font-weight:700;color:#6ee7b7">IBC</div>
+    <div style="text-align:right;font-size:9px;font-weight:700;color:#c4b5fd">Tank</div>
+  </div>${rows}`;
+}
+
+// ══ CALENDAR ══ (individual customer colours + month/day package summaries)
+function renderCalendar(){
+  const el=document.getElementById('tab-calendar');el.innerHTML='';
+  const months={};ALL_DATES.forEach(d=>{const m=d.slice(0,7);if(!months[m])months[m]=[];months[m].push(d)});
+  Object.entries(months).forEach(([mo,moDates])=>{
+    const[yr,m]=mo.split('-');
+    const sec=document.createElement('div');sec.className='msec';
+    let mT=0,mDr=0,mFl=0,mIB=0,mTk=0;
+    moDates.forEach(d=>{const t=dayTotals(d);mT+=t.ton;mDr+=t.drum;mFl+=t.flex;mIB+=t.ibc;mTk+=t.tank});
+    // month header with full pkg summary
+    const mTags=[
+      mT?`<span class="mstag">⚖️ ${mT.toFixed(1)} T</span>`:'',
+      mDr?`<span class="mstag">${DRUM_ICO}<span style="vertical-align:middle"> ${mDr} ถัง</span></span>`:'',
+      mFl?`<span class="mstag">${FLEX_ICO}<span style="vertical-align:middle"> ${mFl} ถุง</span></span>`:'',
+      mIB?`<span class="mstag">📦 ${mIB} เต๋า</span>`:'',
+      mTk?`<span class="mstag">🚛 ${mTk} คัน</span>`:'',
+    ].filter(Boolean).join('');
+    sec.innerHTML=`<div class="mhdr"><span class="mlbl">${MTH[+m-1]} ${yr}</span><div class="mline"></div><div style="display:flex;gap:5px;flex-wrap:wrap">${mTags}</div></div>`;
+    const grid=document.createElement('div');grid.className='cal-grid';
+    WD.forEach((d,i)=>{const dn=document.createElement('div');dn.className=`cal-dname${i===0||i===6?' wk':''}`;dn.textContent=d;grid.appendChild(dn)});
+    const firstDow=new Date(moDates[0]).getDay();
+    for(let i=0;i<firstDow;i++){const e=document.createElement('div');e.className='ccell empty';grid.appendChild(e)}
+    moDates.forEach(ds=>{
+      const d=new Date(ds),dow=d.getDay(),isToday=ds===TODAY,wknd=dow===0||dow===6,hasP=hasPlan(ds);
+      const cell=document.createElement('div');
+      cell.className=`ccell ${wknd?'wknd':''} ${isToday?'today':''} ${hasP?'has-plan':''}`.trim();
+      const custs=getActiveData()[ds]||{};
+      const entries=Object.entries(custs);
+      const t=dayTotals(ds);
+      // customer entries (with individual colour)
+      const entryHtml=entries.slice(0,2).map(([c,u])=>`<div class="cent ${ccCal(c)}"><span class="cent-name">${c}</span><span class="cent-ton">${fT(u.Ton)}</span></div>`).join('');
+      const more=entries.length>2?`<div class="cmore">+${entries.length-2} ราย</div>`:'';
+      // daily pkg summary strip (only if has plan)
+      const dsum=hasP?`<div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:2px">
+        ${t.drum?`<span style="font-size:8.5px;background:var(--drum-l);color:var(--drum-c);border:1px solid var(--drum-m);border-radius:3px;padding:0 3px;font-family:'IBM Plex Mono',monospace;font-weight:700">${DRUM_ICO}<span style="vertical-align:middle">${t.drum}</span></span>`:''}
+        ${t.flex?`<span style="font-size:8.5px;background:var(--flex-l);color:var(--flex-c);border:1px solid var(--flex-m);border-radius:3px;padding:0 3px;font-family:'IBM Plex Mono',monospace;font-weight:700">${FLEX_ICO}<span style="vertical-align:middle">${t.flex}</span></span>`:''}
+        ${t.ibc?`<span style="font-size:8.5px;background:var(--ibc-l);color:var(--ibc-c);border:1px solid var(--ibc-m);border-radius:3px;padding:0 3px;font-family:'IBM Plex Mono',monospace;font-weight:700">📦${t.ibc}</span>`:''}
+        ${t.tank?`<span style="font-size:8.5px;background:var(--tank-l);color:var(--tank-c);border:1px solid var(--tank-m);border-radius:3px;padding:0 3px;font-family:'IBM Plex Mono',monospace;font-weight:700">🚛${t.tank}</span>`:''}
+        ${t.ton?`<span style="font-size:8.5px;background:var(--acc-l);color:var(--acc);border:1px solid var(--grm);border-radius:3px;padding:0 3px;font-family:'IBM Plex Mono',monospace;font-weight:700">⚖️${t.ton.toFixed(1)}T</span>`:''}
+      </div>`:'';
+      cell.innerHTML=`<div class="ccell-num">${d.getDate()}${isToday?' ●':''}</div>${entryHtml}${more}${dsum}`;
+      grid.appendChild(cell);
+    });
+    sec.appendChild(grid);el.appendChild(sec);
+  });
+}
+
+// ══ DATE RANGE ══
+function setRangeMonth(){
+  const d=new Date();
+  document.getElementById('range-start').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+  const last=new Date(d.getFullYear(),d.getMonth()+1,0);
+  document.getElementById('range-end').value=`${last.getFullYear()}-${String(last.getMonth()+1).padStart(2,'0')}-${String(last.getDate()).padStart(2,'0')}`;
+  renderRange();
+}
+function setRangeWeek(){
+  const ws=new Date(weekStart),we=new Date(ws);we.setDate(we.getDate()+6);
+  document.getElementById('range-start').value=ws.toISOString().slice(0,10);
+  document.getElementById('range-end').value=we.toISOString().slice(0,10);
+  renderRange();
+}
+function renderRange(){
+  const s=document.getElementById('range-start').value;
+  const e=document.getElementById('range-end').value;
+  if(!s||!e){document.getElementById('range-summary-wrap').innerHTML='<div class="range-empty">กรุณาเลือกช่วงวันที่</div>';return}
+  const dates=ALL_DATES.filter(d=>d>=s&&d<=e);
+  let totTon=0,totDrum=0,totFlex=0,totIBC=0,totTank=0,planDays=0;
+  const custMap={};
+  dates.forEach(d=>{
+    const t=dayTotals(d);totTon+=t.ton;totDrum+=t.drum;totFlex+=t.flex;totIBC+=t.ibc;totTank+=t.tank;
+    if(hasPlan(d))planDays++;
+    Object.entries(getActiveData()[d]||{}).forEach(([c,u])=>{if(!custMap[c])custMap[c]={ton:0,drum:0,flex:0,ibc:0,tank:0};custMap[c].ton+=u.Ton||0;const q=u.Qty||0,p=u.Pkg||'';if(p==='Drum')custMap[c].drum+=q;else if(p==='IBC')custMap[c].ibc+=q;else if(p==='Tankcar')custMap[c].tank+=q;else if(p.startsWith('Flexibag'))custMap[c].flex+=q});
+  });
+  // summary cards
+  const sw=document.getElementById('range-summary-wrap');
+  sw.innerHTML=`<div class="range-summary">
+    <div class="rs-card"><div class="rs-ico">📅</div><div class="rs-val">${planDays}</div><div class="rs-sub">วันที่มีแผน</div></div>
+    <div class="rs-card"><div class="rs-ico">⚖️</div><div class="rs-val">${totTon.toFixed(1)}</div><div class="rs-sub">ตันรวม</div></div>
+    <div class="rs-card"><div class="rs-ico">${DRUM_ICO}</div><div class="rs-val">${totDrum}</div><div class="rs-sub">HDPE Drum (ถัง)</div></div>
+    <div class="rs-card"><div class="rs-ico">${FLEX_ICO}</div><div class="rs-val">${totFlex}</div><div class="rs-sub">Flexibag (ถุง)</div></div>
+    <div class="rs-card"><div class="rs-ico">📦</div><div class="rs-val">${totIBC}</div><div class="rs-sub">IBC (เต๋า)</div></div>
+    <div class="rs-card"><div class="rs-ico">🚛</div><div class="rs-val">${totTank}</div><div class="rs-sub">Tank car (คัน)</div></div>
+    <div class="rs-card"><div class="rs-ico">🏢</div><div class="rs-val">${Object.keys(custMap).length}</div><div class="rs-sub">ลูกค้า</div></div>
+  </div>`;
+  // customer breakdown table
+  const sortedC=Object.entries(custMap).sort((a,b)=>b[1].ton-a[1].ton);
+  const maxT=sortedC[0]?.[1]?.ton||1;
+  const tbl=document.createElement('div');
+  tbl.style.cssText='background:var(--sur);border-radius:var(--r);border:1.5px solid var(--bdr);overflow:hidden;box-shadow:var(--s1);margin-bottom:20px';
+  tbl.innerHTML=`<div style="padding:12px 16px;background:linear-gradient(135deg,#064e3b,#047857);"><span style="font-size:13px;font-weight:700;color:#fff;font-family:'IBM Plex Mono',monospace">สรุปตามลูกค้า — ${s} ถึง ${e}</span></div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#f1f5f9">
+        <th style="padding:8px 12px;text-align:left;border-bottom:1px solid var(--bdr);font-size:11px;color:var(--tx3)">ลูกค้า</th>
+        <th style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--bdr);font-size:11px;color:var(--tx3)">ตัน</th>
+        <th style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--bdr);font-size:11px;color:var(--drum-c)">${DRUM_ICO} Drum (ถัง)</th>
+        <th style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--bdr);font-size:11px;color:var(--flex-c)">${FLEX_ICO} Flex (ถุง)</th>
+        <th style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--bdr);font-size:11px;color:var(--ibc-c)">📦 IBC (เต๋า)</th>
+        <th style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--bdr);font-size:11px;color:var(--tank-c)">🚛 Tank</th>
+        <th style="padding:8px 12px;border-bottom:1px solid var(--bdr)"></th>
+      </tr></thead>
+      <tbody>${sortedC.map(([c,v],i)=>{
+        const cls=ccCal(c);
+        return `<tr class="${cls}" style="background:${i%2?'var(--sur2)':'var(--sur)'}">
+          <td style="padding:7px 12px;font-weight:700;color:var(--cc);display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--cc);display:inline-block;flex-shrink:0"></span>${c}</td>
+          <td style="padding:7px 12px;text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--acc)">${v.ton.toFixed(1)}</td>
+          <td style="padding:7px 12px;text-align:right;font-family:'IBM Plex Mono',monospace;color:var(--drum-c)">${v.drum||'—'}</td>
+          <td style="padding:7px 12px;text-align:right;font-family:'IBM Plex Mono',monospace;color:var(--flex-c)">${v.flex||'—'}</td>
+          <td style="padding:7px 12px;text-align:right;font-family:'IBM Plex Mono',monospace;color:var(--ibc-c)">${v.ibc||'—'}</td>
+          <td style="padding:7px 12px;text-align:right;font-family:'IBM Plex Mono',monospace;color:var(--tank-c)">${v.tank||'—'}</td>
+          <td style="padding:7px 12px"><div style="height:6px;background:var(--bdr);border-radius:3px;width:80px;overflow:hidden"><div style="height:100%;width:${(v.ton/maxT*100).toFixed(0)}%;background:var(--cc);border-radius:3px"></div></div></td>
+        </tr>`;}).join('')}</tbody>
+    </table>`;
+  sw.appendChild(tbl);
+  // daily detail
+  const rangeEl=document.getElementById('range-days');rangeEl.innerHTML='';
+  const planDates=dates.filter(hasPlan);
+  if(!planDates.length){rangeEl.innerHTML='<div class="nodata">ไม่มีแผนในช่วงนี้</div>';return}
+  const dayList=document.createElement('div');dayList.className='day-list';
+  planDates.forEach((d,idx)=>{
+    const dt=new Date(d),dow=dt.getDay(),isToday=d===TODAY,wknd=dow===0||dow===6;
+    const custs=getActiveData()[d]||{};
+    const card=document.createElement('div');
+    card.className=`day-card ${wknd?'is-wknd':''} ${isToday?'is-today':''}`.trim();
+    card.style.animationDelay=`${idx*8}ms`;
+    const pills=Object.entries(custs).map(([c,u])=>`<div class="cpill"><span class="cpill-dot"></span><span class="cpill-name">${c}</span><span class="cpill-ton">${fT(u.Ton)}</span><div class="cpill-pkgs">${pkgBadgeHtml(u)}${remTagHtml(u)}</div></div>`).join('');
+    card.innerHTML=`<div class="day-hdr"><div class="day-date-col"><div class="dnum">${String(dt.getDate()).padStart(2,'0')}</div><div class="dwd">${WD[dow]}</div>${isToday?'<span class="pip today">TODAY</span>':''}${wknd?'<span class="pip wknd">WKND</span>':''}</div><div class="day-custs">${pills}${isEditor?`<button class="edit-btn" onclick="openEdit('${d}')">✏️</button>`:''}</div></div>${sumStripHtml(d)}`;
+    dayList.appendChild(card);
+  });
+  rangeEl.appendChild(dayList);
+}
+
+// ══ TAB SWITCH ══
+function switchTab(tab,btn){
+  activeTab=tab;
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('tab-'+tab).classList.add('on');
+  const wkn=document.getElementById('wk-nav'),fg=document.getElementById('filter-grp');
+  const tb=document.getElementById('toolbar');
+  if(tab==='range'||tab==='calendar'){wkn.style.display='none';fg.style.display='flex'}
+  else if(tab==='weekly'){wkn.style.display='flex';fg.style.display='none'}
+  else{wkn.style.display='none';fg.style.display='flex'}
+  if(tab==='daily')renderDaily();
+  else if(tab==='weekly')renderWeekly();
+  else if(tab==='monthly')renderMonthly();
+  else if(tab==='calendar')renderCalendar();
+  else if(tab==='range'){setRangeMonth()}
+}
+function setFilter(btn){
+  document.querySelectorAll('[data-f]').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  activeFilter=btn.dataset.f;renderTab(activeTab);
+}
+function renderTab(tab){if(tab==='daily')renderDaily();else if(tab==='weekly')renderWeekly();else if(tab==='monthly')renderMonthly();else if(tab==='calendar')renderCalendar();}
+
+// ══ MODAL ══
+function openAdd(){
+  mDate=null;
+  document.getElementById('mtitle').textContent='➕ เพิ่มแจ้งแผน';
+  document.getElementById('mbody').innerHTML=`<div class="frow"><label class="flbl">วันที่</label><input class="finp" id="mi-date" type="date" value="${TODAY}"></div>${buildCusts({})}`;
+  document.getElementById('ov').classList.add('show');
+}
+function openEdit(date){
+  mDate=date;
+  const[yr,m,d]=date.split('-');
+  document.getElementById('mtitle').textContent=`✏️ แจ้งแผน ${+d}/${+m}/${+yr+543}`;
+  document.getElementById('mbody').innerHTML=buildCusts(getActiveData()[date]||{});
+  document.getElementById('ov').classList.add('show');
+}
+function buildCusts(custs){
+  const html=Object.entries(custs).map(([c,u],i)=>buildEntry(i,c,u)).join('');
+  return `<div id="clist">${html}</div><button class="addcbtn" onclick="addEntry()">+ เพิ่มลูกค้า</button>`;
+}
+function buildEntry(idx,name,u){
+  const custOpts=getActiveCustomers().map(c=>`<option value="${c}"${c===name?' selected':''}>${c}</option>`).join('');
+  const pkgOpts=PKG_LIST.map(p=>`<option value="${p}"${(u.Pkg||'')==p?' selected':''}>${p==='Drum'?'🔵 HDPE Drum (250 kg)':p==='IBC'?'📦 IBC (1,250 kg) · เต๋า':p==='Tankcar'?'🚛 Tank car (25,000 kg)':p.startsWith('Flexibag')?'📦 Container '+p:p}</option>`).join('');
+  const remOpts=['—ไม่มี—','แรป+พาเลท','โหลดเก็บ'].map(r=>`<option value="${r}"${(u.Remark||'—ไม่มี—')===r?' selected':''}>${r}</option>`).join('');
+  const autoQty=u.Pkg&&u.Ton?calcQty(u.Pkg,u.Ton):null;
+  const ldShow=u.Remark==='โหลดเก็บ'?'':'display:none';
+  const qtyNote=u.Pkg?`⚡ คำนวณจาก PKG_KG[${u.Pkg}] อัตโนมัติ`:'';
+  return `<div class="centry" id="ce-${idx}">
+    <div class="cehdr"><div class="cename">${name||'ลูกค้าใหม่'}</div><button class="delbtn" onclick="this.closest('.centry').remove()">✕ ลบ</button></div>
+    <div class="frow-2">
+      <div><label class="flbl">ลูกค้า</label>
+        <select class="fsel" name="cname" onchange="this.closest('.centry').querySelector('.cename').textContent=this.value||'ลูกค้าใหม่'">
+          <option value="">— เลือก / พิมพ์ใหม่ —</option>${custOpts}
+        </select>
+        <input class="finp" name="cname-text" placeholder="หรือพิมพ์ชื่อใหม่..." style="margin-top:5px;font-size:12px" value="${getActiveCustomers().includes(name)?'':name}">
+      </div>
+      <div><label class="flbl">ตัน (Ton)</label><input class="finp" name="ton" type="number" step="0.001" value="${u.Ton||''}" oninput="updateCalc(this)"></div>
+    </div>
+    <div class="frow-2">
+      <div><label class="flbl">บรรจุภัณฑ์</label>
+        <select class="fsel" name="pkg" onchange="updateCalc(this)">${pkgOpts}</select>
+      </div>
+      <div><label class="flbl">จำนวน ⚡ (คำนวณอัตโนมัติ)</label>
+        <input class="finp" name="qty" type="number" step="1" value="${autoQty||u.Qty||''}"
+          readonly style="background:#f0fdf4;color:#059669;font-weight:700" placeholder="—">
+        <div class="auto-calc-note" id="calc-note-${idx}">${autoQty?`⚡ ${autoQty} ${PKG_UNIT[u.Pkg||'']||''}`:''}</div>
+      </div>
+    </div>
+    <div class="frow-2">
+      <div><label class="flbl">หมายเหตุ</label><select class="fsel" name="remark" onchange="toggleLD(this,${idx})">${remOpts}</select></div>
+      <div id="ld-${idx}" style="${ldShow}"><label class="flbl">วันที่โหลด</label><input class="finp" name="loaddate" type="date" value="${u.LoadDate||''}"></div>
+    </div>
+  </div>`;
+}
+function updateCalc(el){
+  const entry=el.closest('.centry');
+  const tonEl=entry.querySelector('[name="ton"]');
+  const pkgEl=entry.querySelector('[name="pkg"]');
+  const qtyEl=entry.querySelector('[name="qty"]');
+  const idx=entry.id.replace('ce-','');
+  const noteEl=document.getElementById('calc-note-'+idx);
+  const ton=parseFloat(tonEl.value)||null;
+  const pkg=pkgEl.value;
+  qtyEl.readOnly=true;
+  qtyEl.style.background='#f0fdf4';
+  qtyEl.style.color='#059669';
+  if(ton&&pkg){
+    const q=calcQty(pkg,ton);
+    if(q!=null){
+      qtyEl.value=q;
+      const unit=PKG_UNIT[pkg]||'';
+      const kgPerUnit=PKG_KG[pkg];
+      const tonPerUnit=kgPerUnit/1000;
+      if(noteEl) noteEl.textContent=`⚡ ${ton}T ÷ ${tonPerUnit}T/${unit} = ${q} ${unit}`;
+    }
+  } else {
+    if(noteEl) noteEl.textContent='';
+  }
+}
+function toggleLD(sel,idx){
+  const ldDiv=document.getElementById('ld-'+idx);
+  if(ldDiv)ldDiv.style.display=sel.value==='โหลดเก็บ'?'block':'none';
+}
+function addEntry(){
+  const list=document.getElementById('clist');
+  const div=document.createElement('div');
+  div.innerHTML=buildEntry(ceIdx++,'',{});
+  list.appendChild(div.firstElementChild);
+}
+function saveModal(){
+  if(!requireEditor())return;
+  const date=mDate||document.getElementById('mi-date')?.value;if(!date)return;
+  const result={};
+  document.querySelectorAll('.centry').forEach(entry=>{
+    const selVal=entry.querySelector('[name="cname"]').value;
+    const textVal=entry.querySelector('[name="cname-text"]').value.trim();
+    const name=textVal||selVal;if(!name||name==='')return;
+    const ton=entry.querySelector('[name="ton"]').value;
+    const pkg=entry.querySelector('[name="pkg"]').value;
+    const qty=entry.querySelector('[name="qty"]').value;
+    const rem=entry.querySelector('[name="remark"]').value;
+    const ld=entry.querySelector('[name="loaddate"]')?.value;
+    const obj={};
+    if(ton)obj.Ton=+ton;if(pkg)obj.Pkg=pkg;if(qty)obj.Qty=+qty;
+    if(rem&&rem!=='—ไม่มี—')obj.Remark=rem;
+    if(rem==='โหลดเก็บ'&&ld)obj.LoadDate=ld;
+    result[name]=obj;
+    // add new customers
+    if(!getActiveCustomers().includes(name)){CUSTOMERS.push(name);fbSaveCustomers();}
+  });
+  getActiveData()[date]=result;
+  // 🔥 Save to Firebase
+  fbSaveDate(date,result,activeProduct);
+  closeModal();updateStats();renderTab(activeTab);
+}
+function closeModal(){document.getElementById('ov').classList.remove('show')}
+function ovClick(e){if(e.target===document.getElementById('ov'))closeModal()}
+
+// ══ TOAST ══
+function showToast(ico,msg,sub,pct=0){
+  document.getElementById('t-ico').textContent=ico;
+  document.getElementById('t-msg').textContent=msg;
+  document.getElementById('t-sub').textContent=sub;
+  document.getElementById('t-bar').style.width=pct+'%';
+  document.getElementById('toast').classList.add('show');
+}
+function hideToast(d=2800){setTimeout(()=>document.getElementById('toast').classList.remove('show'),d)}
+
+// ══ IMPORT EXCEL ══ — reads shared RG+CG workbook
+// Sheet names: 'แผนขาย RG', 'แผนขาย CG', 'ลูกค้า'
+// Also supports old single-sheet format (any sheet with 'แผนขาย')
+function importExcel(input){
+  if(!requireEditor()){input.value='';return;}
+  if(!window.__xlsxReady||typeof XLSX==='undefined'){
+    showToast('⚠️','XLSX ยังโหลดไม่เสร็จ','กรุณารอสักครู่แล้วลองใหม่',0);
+    hideToast(3000);input.value='';return;
+  }
+  const file=input.files[0];if(!file)return;
+  showToast('📂','กำลังอ่านไฟล์...',file.name,15);
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      showToast('🔍','แปลงข้อมูล...','อ่าน sheet RG + CG',40);
+      const wb=XLSX.read(e.target.result,{type:'binary',cellDates:true});
+
+      function parseSheet(ws){
+        if(!ws) return {data:{},count:0};
+        const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+        const newData={};let count=0;let lastDate=null;
+        for(let i=5;i<rows.length;i++){
+          const row=rows[i];if(!row||row.every(v=>v==null||v===''))continue;
+          let dv=row[0],ds=null;
+          if(dv){if(dv instanceof Date)ds=dv.toISOString().slice(0,10);else{const s=String(dv).trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))ds=s;}if(ds)lastDate=ds;}
+          if(!lastDate)continue;ds=lastDate;
+          const cust=row[2]?String(row[2]).trim():null;if(!cust)continue;
+          const ton=row[3]!=null&&row[3]!==''?+row[3]:null;
+          const pkg=row[4]?String(row[4]).trim():null;
+          const qty=row[5]!=null&&row[5]!==''?+row[5]:null;
+          let rem=row[6]?String(row[6]).trim():null;if(rem==='—ไม่มี—')rem=null;
+          let ld=null;if(row[7]){if(row[7] instanceof Date)ld=row[7].toISOString().slice(0,10);else{const s=String(row[7]).trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))ld=s}}
+          const obj={};if(ton)obj.Ton=ton;if(pkg)obj.Pkg=pkg;if(qty)obj.Qty=qty;if(rem)obj.Remark=rem;if(ld)obj.LoadDate=ld;
+          if(!newData[ds])newData[ds]={};newData[ds][cust]=obj;count++;
+          if(!CUSTOMERS.includes(cust))CUSTOMERS.push(cust);
+        }
+        return{data:newData,count};
+      }
+
+      showToast('⚙️','ประมวลผล...','นำเข้า RG + CG',65);
+
+      // Try new combined format first
+      const wsRG=wb.Sheets['แผนขาย RG'];
+      const wsCG=wb.Sheets['แผนขาย CG'];
+      // Fallback to old single-sheet format
+      const wsLegacy=!wsRG?wb.Sheets[wb.SheetNames.find(n=>n.includes('แผนขาย'))||wb.SheetNames[0]]:null;
+
+      let totalImported=0;
+      if(wsRG){const{data,count}=parseSheet(wsRG);Object.assign(DATA,data);totalImported+=count}
+      if(wsCG){const{data,count}=parseSheet(wsCG);Object.assign(CG_DATA,data);totalImported+=count}
+      if(wsLegacy&&!wsRG){
+        const{data,count}=parseSheet(wsLegacy);
+        Object.assign(getActiveData(),data);totalImported+=count;
+      }
+
+      // Import customer list
+      const cs=wb.Sheets['ลูกค้า'];
+      if(cs){const cr=XLSX.utils.sheet_to_json(cs,{header:1,defval:null});for(let i=2;i<cr.length;i++){const c=cr[i]?.[0];if(c&&!CUSTOMERS.includes(String(c).trim()))CUSTOMERS.push(String(c).trim())}}
+
+      if(!totalImported){showToast('⚠️','ไม่พบข้อมูล','',0);hideToast(3000);return}
+      Object.values(DATA).forEach(d=>Object.keys(d).forEach(c=>ccCal(c)));
+      updateStats();renderTab(activeTab);
+      showToast('✅',`นำเข้าสำเร็จ! ${totalImported} รายการ`,`จาก ${file.name}`,100);
+      hideToast(3500);
+      // 🔥 Push all imported data to Firebase
+      setSyncStatus('saving');
+      const savePromises=[];
+      Object.entries(DATA).forEach(([date,dayData])=>{
+        if(Object.keys(dayData).length)savePromises.push(fbSaveDate(date,dayData,'rg'));
+      });
+      Object.entries(CG_DATA).forEach(([date,dayData])=>{
+        if(Object.keys(dayData).length)savePromises.push(fbSaveDate(date,dayData,'cg'));
+      });
+      fbSaveCustomers();
+      setTimeout(()=>setSyncStatus('online'),2000);
+    }catch(err){showToast('❌','เกิดข้อผิดพลาด',err.message,0);hideToast(4000)}
+    input.value='';
+  };
+  reader.onerror=()=>{showToast('❌','อ่านไฟล์ไม่ได้','',0);hideToast(3000)};
+  reader.readAsBinaryString(file);
+}
+
+// ══ EXPORT EXCEL ══ — writes both RG + CG in one shared workbook
+function exportExcel(){
+  if(!requireEditor())return;
+  if(!window.__xlsxReady||typeof XLSX==='undefined'){
+    showToast('⚠️','XLSX ยังโหลดไม่เสร็จ','กรุณารอสักครู่แล้วลองใหม่',0);
+    hideToast(3000);return;
+  }
+  showToast('📤','กำลัง Export...','สร้างไฟล์ Excel (RG + CG)',30);
+  try{
+    const wb=XLSX.utils.book_new();
+    const DAY_TH=["อา","จ","อ","พ","พฤ","ศ","ส"];
+
+    function buildDataRows(srcData){
+      const rows=[
+        ["📋  แจ้งแผน Glycerine — กรอกแผนขายรายวัน","","","","","","",""],
+        ["⚡  กรอก: วันที่ / ลูกค้า / ตัน / บรรจุภัณฑ์  →  คอลัมน์ F (จำนวน) คำนวณอัตโนมัติ","","","","","","",""],
+        ["Drum: 250 kg/ถัง","IBC: 1,250 kg/เต๋า","Tankcar: 25,000 kg/คัน","Flexibag 20.0: 20,000 kg","Flexibag 22.0: 22,000 kg","Flexibag 22.2: 22,200 kg","Flexibag 22.5: 22,500 kg","Flexibag 25.0: 25,000 kg"],
+        ["","","","","","","",""],
+        ["วันที่","วัน","ลูกค้า","ตัน (Ton)","บรรจุภัณฑ์ (Package)","จำนวน (Auto ⚡)","หมายเหตุ","วันที่โหลด"],
+      ];
+      ALL_DATES.forEach(d=>{
+        const custs=srcData[d]||{};
+        const dt=new Date(d),dow=dt.getDay();
+        const dayTH=DAY_TH[dow];
+        if(!Object.keys(custs).length){rows.push([d,dayTH,'','','','','','']);return}
+        Object.entries(custs).forEach(([c,u])=>{
+          const qty=calcQty(u.Pkg,u.Ton)||u.Qty||'';
+          rows.push([d,dayTH,c,u.Ton||'',u.Pkg||'',qty,u.Remark||'—ไม่มี—',u.LoadDate||'']);
+        });
+      });
+      return rows;
+    }
+
+    // Sheet 1: RG
+    const wsRG=XLSX.utils.aoa_to_sheet(buildDataRows(DATA));
+    wsRG['!cols']=[{wch:13},{wch:5},{wch:22},{wch:10},{wch:18},{wch:12},{wch:16},{wch:13}];
+    wsRG['!merges']=[{s:{r:0,c:0},e:{r:0,c:7}},{s:{r:1,c:0},e:{r:1,c:7}}];
+    XLSX.utils.book_append_sheet(wb,wsRG,'แผนขาย RG');
+
+    // Sheet 2: CG
+    const wsCG=XLSX.utils.aoa_to_sheet(buildDataRows(CG_DATA));
+    wsCG['!cols']=[{wch:13},{wch:5},{wch:22},{wch:10},{wch:18},{wch:12},{wch:16},{wch:13}];
+    wsCG['!merges']=[{s:{r:0,c:0},e:{r:0,c:7}},{s:{r:1,c:0},e:{r:1,c:7}}];
+    XLSX.utils.book_append_sheet(wb,wsCG,'แผนขาย CG');
+
+    // Sheet 3: Customer list (shared)
+    const custRows=[
+      ["รายชื่อลูกค้า (ใช้ร่วมกัน RG & CG) — เพิ่มชื่อใหม่ได้ที่นี่","",""],
+      ["ชื่อลูกค้า","ประเทศ/หมายเหตุ","Package หลัก"],
+      ...CUSTOMERS.map(c=>[c,'','']),
+    ];
+    const wsCust=XLSX.utils.aoa_to_sheet(custRows);
+    wsCust['!cols']=[{wch:28},{wch:20},{wch:18}];
+    XLSX.utils.book_append_sheet(wb,wsCust,'ลูกค้า');
+
+    const now=new Date();
+    const fname=`แจ้งแผน_Glycerine_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.xlsx`;
+    XLSX.writeFile(wb,fname);
+    showToast('✅','Export สำเร็จ! (RG + CG)',fname,100);hideToast(3000);
+  }catch(err){showToast('❌','Export ล้มเหลว',err.message,0);hideToast(4000)}
+}
+
+// ══════════════════════════════════════════════════
+// AUTH SYSTEM — Password protection for editors
+// ══════════════════════════════════════════════════
+// เปลี่ยน password ตรงนี้ได้เลย ↓
+const EDITOR_PASSWORD = 'glycerine2026';
+
+let isEditor = false; // false = viewer only, true = can edit
+
+function setEditorMode(on){
+  isEditor = on;
+  // แสดง/ซ่อนปุ่ม editor
+  ['btn-import','btn-export','btn-add'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display = on ? 'flex' : 'none';
+  });
+  // ซ่อนปุ่ม edit ใน day cards เมื่อเป็น viewer
+  document.querySelectorAll('.edit-btn').forEach(b=>b.style.display=on?'':'none');
+  // อัปเดตปุ่ม auth
+  const btn=document.getElementById('auth-toggle-btn');
+  if(btn){
+    if(on){
+      btn.innerHTML='🔓 ออกจากระบบ';
+      btn.classList.add('unlocked');
+      btn.onclick=logoutEditor;
+    } else {
+      btn.innerHTML='🔒 เข้าสู่ระบบ';
+      btn.classList.remove('unlocked');
+      btn.onclick=showAuthModal;
+    }
+  }
+}
+
+function showAuthModal(){
+  document.getElementById('auth-overlay').style.display='flex';
+  document.getElementById('auth-inp').value='';
+  document.getElementById('auth-err').textContent='';
+  setTimeout(()=>document.getElementById('auth-inp').focus(),100);
+}
+
+function closeAuthModal(){
+  document.getElementById('auth-overlay').style.display='none';
+}
+
+function authOverlayClick(e){
+  if(e.target===document.getElementById('auth-overlay')) closeAuthModal();
+}
+
+function toggleAuthEye(){
+  const inp=document.getElementById('auth-inp');
+  const btn=document.getElementById('auth-eye-btn');
+  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
+  else{inp.type='password';btn.textContent='👁';}
+}
+
+function submitAuth(){
+  const val=document.getElementById('auth-inp').value;
+  const errEl=document.getElementById('auth-err');
+  const inp=document.getElementById('auth-inp');
+  if(val===EDITOR_PASSWORD){
+    closeAuthModal();
+    setEditorMode(true);
+    showToast('🔓','เข้าสู่โหมดแก้ไขแล้ว','สามารถเพิ่ม/แก้ไข/Export ข้อมูลได้',100);
+    hideToast(2500);
+  } else {
+    errEl.textContent='❌ Password ไม่ถูกต้อง กรุณาลองใหม่';
+    inp.classList.add('shake');
+    inp.value='';
+    inp.focus();
+    setTimeout(()=>inp.classList.remove('shake'),400);
+  }
+}
+
+function logoutEditor(){
+  setEditorMode(false);
+  showToast('🔒','ออกจากโหมดแก้ไขแล้ว','กลับสู่โหมดดูข้อมูล',100);
+  hideToast(2000);
+}
+
+// Guard functions — เรียกก่อน save/import/export
+function requireEditor(){
+  if(!isEditor){showAuthModal();return false;}
+  return true;
+}
+
+// ══════════════════════════════════════════════════
+// FIREBASE REALTIME SYNC
+// ══════════════════════════════════════════════════
+const FB_CONFIG={
+  apiKey:"AIzaSyA_eHS1RmyHMt5ZnNK-NYifz0jBAcn7_go",
+  authDomain:"plan-cg-rg.firebaseapp.com",
+  databaseURL:"https://plan-cg-rg-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"plan-cg-rg",
+  storageBucket:"plan-cg-rg.firebasestorage.app",
+  messagingSenderId:"781217204429",
+  appId:"1:781217204429:web:8a7621280e623a533f8184"
+};
+
+let db,dbRef,_fbReady=false,_suppressSave=false;
+
+// ── Sync status UI ──
+function setSyncStatus(status){
+  const dot=document.getElementById('sync-dot');
+  const txt=document.getElementById('sync-txt');
+  if(!dot||!txt)return;
+  const s={
+    connecting:{c:'#fbbf24',t:'กำลังเชื่อมต่อ...'},
+    online:    {c:'#34d399',t:'ออนไลน์ ✓'},
+    saving:    {c:'#60a5fa',t:'กำลังบันทึก...'},
+    saved:     {c:'#34d399',t:'บันทึกแล้ว ✓'},
+    offline:   {c:'#ef4444',t:'ออฟไลน์'},
+    error:     {c:'#ef4444',t:'เชื่อมต่อไม่ได้'},
+  }[status]||{c:'#9ca3af',t:status};
+  dot.style.background=s.c;txt.textContent=s.t;
+}
+
+function initFirebase(){
+  try{
+    firebase.initializeApp(FB_CONFIG);
+    db=firebase.database();
+    dbRef={
+      rg: db.ref('data/rg'),
+      cg: db.ref('data/cg'),
+      customers: db.ref('data/customers'),
+    };
+    db.ref('.info/connected').on('value',snap=>{
+      if(snap.val()===false)setSyncStatus('offline');
+      else if(_fbReady)setSyncStatus('online');
+    });
+    fbLoadAll();
+  }catch(e){
+    console.error('Firebase init error',e);
+    setSyncStatus('error');
+    // Fallback: render with local data anyway
+    _fbReady=true;
+    renderFallback();
+  }
+}
+
+function renderFallback(){
+  const d=new Date(),dy=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+  document.getElementById('today-badge').textContent=`${dy[d.getDay()]} ${d.getDate()} ${MTH[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById('range-start').value=TODAY.slice(0,7)+'-01';
+  document.getElementById('range-end').value=TODAY;
+  Object.values(DATA).forEach(d=>Object.keys(d).forEach(c=>ccCal(c)));
+  updateStats();renderDaily();renderWeekly();renderMonthly();renderCalendar();
+}
+
+
+// ── Convert date-keyed data to Firebase-safe keys (replace '.' with '_') ──
+// Firebase keys cannot contain '.' but our dates use '-' so fine.
+// Customer names may have special chars — we store as array instead
+function dataToFB(dataObj){
+  // {dateStr: {custName: {...}}} → store directly, Firebase handles nested
+  return dataObj;
+}
+function fbToData(snapshot){
+  return snapshot||{};
+}
+
+// ── Load all data from Firebase ──
+function fbLoadAll(){
+  setSyncStatus('connecting');
+  let rgDone=false,cgDone=false,custDone=false;
+  function checkReady(){
+    if(rgDone&&cgDone&&custDone&&!_fbReady){
+      _fbReady=true;
+      setSyncStatus('online');
+      // Init calendar colour map
+      Object.values(DATA).forEach(d=>Object.keys(d).forEach(c=>ccCal(c)));
+      Object.values(CG_DATA).forEach(d=>Object.keys(d).forEach(c=>ccCal(c)));
+      // Render
+      const d=new Date(),dy=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+      document.getElementById('today-badge').textContent=`${dy[d.getDay()]} ${d.getDate()} ${MTH[d.getMonth()]} ${d.getFullYear()}`;
+      document.getElementById('range-start').value=TODAY.slice(0,7)+'-01';
+      document.getElementById('range-end').value=TODAY;
+      updateStats();renderDaily();renderWeekly();renderMonthly();renderCalendar();
+    }
+  }
+
+  // Listen RG — real-time (update immediately when others change)
+  dbRef.rg.on('value',snap=>{
+    const val=snap.val();
+    _suppressSave=true;
+    if(val){
+      // Merge: keep local keys, overwrite with remote
+      Object.keys(val).forEach(date=>{
+        DATA[date]={};
+        Object.keys(val[date]).forEach(rawCust=>{
+          // Firebase encodes some chars — decode customer name
+          const cust=rawCust.replace(/·/g,'.').replace(/‐/g,'-');
+          DATA[date][cust]=val[date][rawCust];
+        });
+      });
+    }
+    rgDone=true;_suppressSave=false;
+    checkReady();
+    if(_fbReady){updateStats();renderTab(activeTab);}
+    setSyncStatus('online');
+  },err=>{setSyncStatus('error');console.error('RG load error',err)});
+
+  // Listen CG
+  dbRef.cg.on('value',snap=>{
+    const val=snap.val();
+    _suppressSave=true;
+    if(val){
+      Object.keys(val).forEach(date=>{
+        CG_DATA[date]={};
+        Object.keys(val[date]).forEach(rawCust=>{
+          const cust=rawCust.replace(/·/g,'.').replace(/‐/g,'-');
+          CG_DATA[date][cust]=val[date][rawCust];
+        });
+      });
+    }
+    cgDone=true;_suppressSave=false;
+    checkReady();
+    if(_fbReady){updateStats();if(activeProduct==='cg')renderTab(activeTab);}
+    setSyncStatus('online');
+  },err=>{setSyncStatus('error')});
+
+  // Listen customers
+  dbRef.customers.on('value',snap=>{
+    const val=snap.val();
+    if(val&&Array.isArray(val)){
+      val.forEach(c=>{if(c&&!CUSTOMERS.includes(c))CUSTOMERS.push(c);});
+    }
+    custDone=true;checkReady();
+  },()=>{custDone=true;checkReady();});
+}
+
+// ── Save one date to Firebase ──
+function fbSaveDate(date,dataObj,product){
+  if(_suppressSave||!dbRef)return;
+  setSyncStatus('saving');
+  const ref=product==='rg'?dbRef.rg:dbRef.cg;
+  const encoded={};
+  Object.keys(dataObj).forEach(cust=>{
+    const key=cust.replace(/\./g,'·').replace(/-/g,'‐');
+    encoded[key]=dataObj[cust];
+  });
+  ref.child(date).set(Object.keys(encoded).length?encoded:null)
+    .then(()=>{setSyncStatus('saved');setTimeout(()=>setSyncStatus('online'),1500);})
+    .catch(e=>{setSyncStatus('error');console.error('Save error',e);});
+}
+
+// ── Save customers list to Firebase ──
+function fbSaveCustomers(){
+  if(!dbRef)return;
+  dbRef.customers.set(CUSTOMERS).catch(e=>console.error('Cust save error',e));
+}
+
+// ── Connection state ──
+// (handled inside initFirebase)
+
+// ══ INIT ══
+// Wait for full DOM before running
+document.addEventListener('DOMContentLoaded', function(){
+  var srchInp = document.getElementById('srch-inp');
+  if(srchInp) srchInp.addEventListener('input',function(e){srch=e.target.value;renderTab(activeTab)});
+  setSyncStatus('connecting');
+  renderFallback(); // Show data immediately
+  window.__appReady = function(){};
+});
+</script>
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="auth-overlay" style="display:none" onclick="authOverlayClick(event)">
+  <div class="auth-box">
+    <div class="auth-hdr">
+      <div class="auth-ico">🔐</div>
+      <div class="auth-title">เข้าสู่โหมดแก้ไข</div>
+      <div class="auth-sub">กรอก Password เพื่อเพิ่ม/แก้ไข/Export ข้อมูล</div>
+    </div>
+    <div class="auth-body">
+      <div class="auth-err" id="auth-err"></div>
+      <div class="auth-inp-wrap">
+        <input type="password" class="auth-inp" id="auth-inp" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter')submitAuth()"
+          oninput="document.getElementById('auth-err').textContent=''">
+        <button class="auth-eye" onclick="toggleAuthEye()" id="auth-eye-btn">👁</button>
+      </div>
+      <button class="auth-submit" onclick="submitAuth()">🔓 เข้าสู่ระบบ</button>
+      <button class="auth-cancel" onclick="closeAuthModal()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDKs — loaded LAST, Edge-compatible with fallbacks -->
+<script>
+(function(){
+  var fbCDNs=[
+    'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+    'https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.min.js'
+  ];
+  var dbCDNs=[
+    'https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js',
+    'https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database-compat.min.js'
+  ];
+  function loadScript(urls,idx,onOk,onFail){
+    if(idx>=urls.length){if(onFail)onFail();return;}
+    var s=document.createElement('script');
+    s.src=urls[idx];
+    s.crossOrigin='anonymous';
+    s.onload=function(){if(onOk)onOk();};
+    s.onerror=function(){loadScript(urls,idx+1,onOk,onFail);};
+    document.body.appendChild(s);
+  }
+  // Chain: load app → load database → initFirebase
+  loadScript(fbCDNs,0,
+    function(){
+      loadScript(dbCDNs,0,
+        function(){ initFirebase(); },
+        function(){ console.error('Firebase DB SDK failed'); setSyncStatus('error'); renderFallback(); }
+      );
+    },
+    function(){ console.error('Firebase App SDK failed'); setSyncStatus('error'); renderFallback(); }
+  );
+})();
+</script>
+</body>
+</html>
