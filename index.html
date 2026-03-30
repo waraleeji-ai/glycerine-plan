@@ -4,27 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>แจ้งแผน Glycerine — RG & CG v11</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* System fonts only - no external requests needed */
+body{font-family:'Sarabun','TH Sarabun New','Noto Sans Thai',Tahoma,'Segoe UI',Arial,sans-serif}
+code,pre,kbd,samp,.wk-label,.hstat-v,.dnum,.cpill-ton,.pbadge,.sum-num,.sum-total,.wfv,.rs-val,.mstat-v,.mc-ton,.wday-num,.today-badge,.auto-calc-note,.calc-result,.mlbl{font-family:'IBM Plex Mono','Courier New',Consolas,monospace}
+</style>
 <script>
-// Load XLSX in background — app works without it, only needed for import/export
+// XLSX loaded on-demand when import/export is clicked
 window.__xlsxReady = false;
-(function(){
+window.__xlsxLoading = false;
+window.__xlsxCallbacks = [];
+window.loadXLSX = function(cb) {
+  if(window.__xlsxReady) { cb(); return; }
+  if(cb) window.__xlsxCallbacks.push(cb);
+  if(window.__xlsxLoading) return;
+  window.__xlsxLoading = true;
   var cdns = [
     'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
     'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
   ];
   function tryLoad(i){
-    if(i>=cdns.length){ return; } // Failed silently — import/export buttons will show error
+    if(i>=cdns.length){ 
+      window.__xlsxLoading=false;
+      showToast && showToast('❌','โหลด XLSX ไม่ได้','ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต',0);
+      return; 
+    }
     var s=document.createElement('script');
     s.src=cdns[i];
-    s.crossOrigin='anonymous';
-    s.onload=function(){ window.__xlsxReady=true; };
+    s.onload=function(){ 
+      window.__xlsxReady=true; 
+      window.__xlsxLoading=false;
+      window.__xlsxCallbacks.forEach(function(f){try{f();}catch(e){}});
+      window.__xlsxCallbacks=[];
+    };
     s.onerror=function(){tryLoad(i+1);};
     document.head.appendChild(s);
   }
   tryLoad(0);
-})();
+};
 </script>
 <style>
 :root{
@@ -232,7 +250,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);font-
 .ccell.today .ccell-num{color:#065f46}
 .ccell.wknd .ccell-num{color:#c2410c}
 /* calendar entries use individual colour per customer */
-.cent{border-radius:4px;padding:2px 5px;font-size:10px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:3px;border-left:2px solid var(--cc);background:color-mix(in srgb, var(--cc) 10%, white)}
+.cent{border-radius:4px;padding:2px 5px;font-size:10px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:3px;border-left:2px solid var(--cc);background:rgba(200,200,200,0.15)}
 .cent-name{font-weight:700;color:var(--cc);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:68%}
 .cent-ton{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--tx3);margin-left:auto}
 .cmore{font-size:9px;color:var(--tx4);text-align:center;padding:1px}
@@ -261,7 +279,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);font-
 .t-bar-fill{height:100%;background:#34d399;border-radius:2px;width:0%;transition:width .4s ease}
 
 /* ══ MODAL ══ */
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.ov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
 .ov.show{opacity:1;pointer-events:all}
 .modal{background:var(--sur);border-radius:var(--r);box-shadow:var(--s3);width:100%;max-width:560px;max-height:86vh;overflow:hidden;display:flex;flex-direction:column;transform:translateY(12px);transition:transform .2s}
 .ov.show .modal{transform:translateY(0)}
@@ -400,7 +418,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);font-
 .auth-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .auth-btn:hover{background:rgba(255,255,255,.22)}
 .auth-btn.unlocked{background:rgba(52,211,153,.2);border-color:rgba(52,211,153,.5);color:#34d399}
-.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.auth-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px}
 .auth-box{background:var(--sur);border-radius:20px;box-shadow:0 24px 60px rgba(0,0,0,.3);width:100%;max-width:360px;overflow:hidden}
 .auth-hdr{padding:28px 24px 20px;background:linear-gradient(135deg,#064e3b,#047857);text-align:center}
 .auth-ico{font-size:40px;margin-bottom:10px}
@@ -906,7 +924,7 @@ function renderMonthly(){
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
           <span style="width:10px;height:10px;border-radius:50%;background:var(--acc);flex-shrink:0;display:inline-block"></span>
           <span style="font-size:13px;font-weight:700;color:var(--tx);font-family:'IBM Plex Mono',monospace">${MTH[+m-1]} ${yr}</span>
-          ${hasData?`<button onclick="toggleMonthTable('${moId}','${mo}',${JSON.stringify(moDates)})" style="margin-left:auto;padding:2px 8px;font-size:10px;border-radius:5px;border:1.5px solid var(--bdr2);background:var(--sur2);color:var(--tx3);cursor:pointer;font-family:'Sarabun',sans-serif">📋 ดูรายวัน</button>`:''}
+          ${hasData?`<button onclick="toggleMonthTable('${moId}')" data-mo="${mo}" data-dates='${JSON.stringify(moDates).replace(/'/g,"&#39;")}' style="margin-left:auto;padding:2px 8px;font-size:10px;border-radius:5px;border:1.5px solid var(--bdr2);background:var(--sur2);color:var(--tx3);cursor:pointer;font-family:'Sarabun',sans-serif">📋 ดูรายวัน</button>`:''}
         </div>
         ${hasData?`
         <!-- stats row -->
@@ -941,12 +959,15 @@ function renderMonthly(){
   el.appendChild(grid);
 }
 
-function toggleMonthTable(id,mo,moDates){
+function toggleMonthTable(id){
   const el=document.getElementById(id);
   if(!el)return;
   if(el.style.display==='none'){
-    // Build day table lazily on first open
     if(!el.dataset.built){
+      // Get mo and moDates from button's data attributes
+      const btn=document.querySelector(`[onclick="toggleMonthTable('${id}')"]`);
+      const mo=btn?btn.dataset.mo:'';
+      const moDates=btn?JSON.parse(btn.dataset.dates||'[]'):[];
       el.innerHTML=buildMonthDayTable(mo,moDates);
       el.dataset.built='1';
     }
@@ -1281,8 +1302,10 @@ function hideToast(d=2800){setTimeout(()=>document.getElementById('toast').class
 function importExcel(input){
   if(!requireEditor()){input.value='';return;}
   if(!window.__xlsxReady||typeof XLSX==='undefined'){
-    showToast('⚠️','XLSX ยังโหลดไม่เสร็จ','กรุณารอสักครู่แล้วลองใหม่',0);
-    hideToast(3000);input.value='';return;
+    showToast('⚠️','กำลังโหลด XLSX...','รอสักครู่',50);
+    var savedInput=input;
+    window.loadXLSX(function(){ importExcel(savedInput); });
+    return;
   }
   const file=input.files[0];if(!file)return;
   showToast('📂','กำลังอ่านไฟล์...',file.name,15);
@@ -1361,8 +1384,9 @@ function importExcel(input){
 function exportExcel(){
   if(!requireEditor())return;
   if(!window.__xlsxReady||typeof XLSX==='undefined'){
-    showToast('⚠️','XLSX ยังโหลดไม่เสร็จ','กรุณารอสักครู่แล้วลองใหม่',0);
-    hideToast(3000);return;
+    showToast('⚠️','กำลังโหลด XLSX...','รอสักครู่',50);
+    window.loadXLSX(function(){ exportExcel(); });
+    return;
   }
   showToast('📤','กำลัง Export...','สร้างไฟล์ Excel (RG + CG)',30);
   try{
@@ -1558,12 +1582,18 @@ function initFirebase(){
 }
 
 function renderFallback(){
-  const d=new Date(),dy=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-  document.getElementById('today-badge').textContent=`${dy[d.getDay()]} ${d.getDate()} ${MTH[d.getMonth()]} ${d.getFullYear()}`;
-  document.getElementById('range-start').value=TODAY.slice(0,7)+'-01';
-  document.getElementById('range-end').value=TODAY;
-  Object.values(DATA).forEach(d=>Object.keys(d).forEach(c=>ccCal(c)));
-  updateStats();renderDaily();renderWeekly();renderMonthly();renderCalendar();
+  try{
+    const d=new Date(),dy=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+    document.getElementById('today-badge').textContent=`${dy[d.getDay()]} ${d.getDate()} ${MTH[d.getMonth()]} ${d.getFullYear()}`;
+    document.getElementById('range-start').value=TODAY.slice(0,7)+'-01';
+    document.getElementById('range-end').value=TODAY;
+    Object.values(DATA).forEach(d=>Object.keys(d).forEach(c=>ccCal(c)));
+    try{updateStats();}catch(e){console.error('updateStats:',e);}
+    try{renderDaily();}catch(e){console.error('renderDaily:',e);}
+    try{renderWeekly();}catch(e){console.error('renderWeekly:',e);}
+    try{renderMonthly();}catch(e){console.error('renderMonthly:',e);}
+    try{renderCalendar();}catch(e){console.error('renderCalendar:',e);}
+  }catch(e){console.error('renderFallback error:',e);}
 }
 
 
@@ -1675,11 +1705,15 @@ function fbSaveCustomers(){
 // ══ INIT ══
 // Wait for full DOM before running
 document.addEventListener('DOMContentLoaded', function(){
-  var srchInp = document.getElementById('srch-inp');
-  if(srchInp) srchInp.addEventListener('input',function(e){srch=e.target.value;renderTab(activeTab)});
-  setSyncStatus('connecting');
-  renderFallback(); // Show data immediately
-  window.__appReady = function(){};
+  try {
+    var srchInp = document.getElementById('srch-inp');
+    if(srchInp) srchInp.addEventListener('input',function(e){srch=e.target.value;renderTab(activeTab)});
+    setSyncStatus('connecting');
+    try { renderFallback(); } catch(e) { console.error('renderFallback error:', e); }
+    window.__appReady = function(){};
+  } catch(e) {
+    console.error('INIT error:', e);
+  }
 });
 </script>
 <!-- AUTH MODAL -->
@@ -1704,9 +1738,15 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
 </div>
 
-<!-- Firebase SDKs — loaded LAST, Edge-compatible with fallbacks -->
+<!-- Firebase SDKs — skip if running from file:// (Edge security) -->
 <script>
 (function(){
+  // Don't load Firebase from file:// — Edge blocks it
+  if(location.protocol === 'file:') {
+    console.log('Running from file:// — Firebase disabled, offline mode');
+    setSyncStatus('offline');
+    return;
+  }
   var fbCDNs=[
     'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
     'https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.min.js'
@@ -1719,20 +1759,18 @@ document.addEventListener('DOMContentLoaded', function(){
     if(idx>=urls.length){if(onFail)onFail();return;}
     var s=document.createElement('script');
     s.src=urls[idx];
-    s.crossOrigin='anonymous';
     s.onload=function(){if(onOk)onOk();};
     s.onerror=function(){loadScript(urls,idx+1,onOk,onFail);};
     document.body.appendChild(s);
   }
-  // Chain: load app → load database → initFirebase
   loadScript(fbCDNs,0,
     function(){
       loadScript(dbCDNs,0,
         function(){ initFirebase(); },
-        function(){ console.error('Firebase DB SDK failed'); setSyncStatus('error'); renderFallback(); }
+        function(){ console.log('Firebase DB unavailable'); setSyncStatus('offline'); }
       );
     },
-    function(){ console.error('Firebase App SDK failed'); setSyncStatus('error'); renderFallback(); }
+    function(){ console.log('Firebase App unavailable'); setSyncStatus('offline'); }
   );
 })();
 </script>
