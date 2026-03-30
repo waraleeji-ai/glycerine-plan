@@ -428,15 +428,15 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);font-
       <button id="btn-export" class="hbtn ghost" onclick="exportExcel()" style="display:none">📤 Export Excel</button>
       <button id="btn-add" class="hbtn ghost" onclick="openAdd()" style="display:none">＋ เพิ่มแจ้งแผน</button>
       <button id="auth-toggle-btn" class="auth-btn" onclick="showAuthModal()">🔒 เข้าสู่ระบบ</button>
-      <div id="sync-badge" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11px;color:rgba(255,255,255,.7);white-space:nowrap">
-        <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:#fbbf24;flex-shrink:0;display:inline-block"></span>
-        <span id="sync-txt">กำลังเชื่อมต่อ...</span>
+      <div id="sync-badge" title="สถานะการเชื่อมต่อ" style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11px;color:rgba(255,255,255,.8);white-space:nowrap;cursor:default">
+        <span id="sync-dot" style="width:8px;height:8px;border-radius:50%;background:#fbbf24;flex-shrink:0;display:inline-block;transition:background .3s"></span>
+        <span id="sync-txt" style="font-size:10px">กำลังเชื่อมต่อ...</span>
       </div>
     </div>
 
-      <div id="sync-badge" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11px;color:rgba(255,255,255,.7);white-space:nowrap">
-        <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:#fbbf24;flex-shrink:0;display:inline-block"></span>
-        <span id="sync-txt">กำลังเชื่อมต่อ...</span>
+      <div id="sync-badge" title="สถานะการเชื่อมต่อ" style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11px;color:rgba(255,255,255,.8);white-space:nowrap;cursor:default">
+        <span id="sync-dot" style="width:8px;height:8px;border-radius:50%;background:#fbbf24;flex-shrink:0;display:inline-block;transition:background .3s"></span>
+        <span id="sync-txt" style="font-size:10px">กำลังเชื่อมต่อ...</span>
       </div>
     </div>
   </div>
@@ -1409,7 +1409,7 @@ let db,dbRef,_fbReady=false,_suppressSave=false;
 function setSyncStatus(status){
   const dot=document.getElementById('sync-dot');
   const txt=document.getElementById('sync-txt');
-  if(!dot||!txt)return;
+  if(!dot||!txt){setTimeout(function(){setSyncStatus(status);},500);return;}
   const s={
     connecting:{c:'#fbbf24',t:'กำลังเชื่อมต่อ...'},
     online:    {c:'#34d399',t:'ออนไลน์ ✓'},
